@@ -6,6 +6,7 @@ from rdkit import Chem
 import torch
 from torch_geometric.data import Data
 from torch_geometric.utils import subgraph
+import networkx as nx
 
 
 
