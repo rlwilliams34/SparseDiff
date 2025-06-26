@@ -8,6 +8,42 @@ from torch_geometric.data import Data
 from torch_geometric.utils import subgraph
 
 
+
+def graph_to_pyg_data(g: nx.Graph, bins=None, n_bins = 10, global_max=None, global_min=None):
+    # --- NODE FEATURES ---
+    num_nodes = g.number_of_nodes()
+    x = torch.ones((num_nodes, 1))  # "null" node feature
+    
+    # --- EDGE INDEX ---
+    edge_list = list(g.edges())
+    edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()  # shape [2, num_edges]
+    
+    # --- EDGE ATTRIBUTES ---
+    edge_weights = np.array([g[u][v]['weight'] for u, v in edge_list])
+    
+    # Normalize edge weights globally or locally
+    if global_min is None:
+        global_min = edge_weights.min()
+    if global_max is None:
+        global_max = edge_weights.max()
+        
+    #norm_weights = (edge_weights - global_min) / (global_max - global_min + 1e-8)
+    
+    # Discretize into bins
+    if bins are None:
+        bins = np.linspace(global_min, global_max, n_bins + 1)
+    
+    digitized = np.digitize(edge_weights, bins) - 1  # convert to 0-based bin index
+    digitized = np.clip(digitized, 0, n_bins - 1)
+    
+    # One-hot encode edge features
+    edge_attr = torch.eye(n_bins)[digitized]
+    
+    # Create PyG Data object
+    data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
+    
+    return data
+
 def mol_to_torch_geometric(mol, atom_encoder, smiles):
     adj = torch.from_numpy(Chem.rdmolops.GetAdjacencyMatrix(mol, useBO=True))
     edge_index = adj.nonzero().contiguous().T

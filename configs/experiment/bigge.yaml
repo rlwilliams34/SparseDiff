@@ -1,0 +1,35 @@
+defaults:
+  - _self_
+  - model: gtrans_edge
+  - dataset: custom  # We'll override this manually
+  - train: base
+  - val: base
+  - test: base
+  - override hydra/job_logging: stdout
+  - override hydra/hydra_logging: none
+
+dataset:
+  name: lobster
+  root: /home/richard/Projects/BiGG-E-Repo/extensions/train_graphs/lobster
+  n_bins: 10
+  split: train  # Will be overridden by train/val/test phases
+  num_workers: 4
+
+model:
+  node_dim: 1
+  edge_dim: 10
+  n_classes: 10  # same as edge_dim if categorical bins used
+  edge_hidden_dim: 64
+  node_hidden_dim: 64
+
+trainer:
+  max_epochs: 5
+  batch_size: 16
+  log_every_n_steps: 1
+  accelerator: gpu
+  devices: 1
+
+val:
+  split: val
+test:
+  split: test
