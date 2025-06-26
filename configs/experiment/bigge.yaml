@@ -1,35 +1,78 @@
-defaults:
-  - _self_
-  - /model: discrete
-#  - dataset: custom  # We'll override this manually
-#  - train: base
-#  - val: base
-#  - test: base
-  - /hydra/job_logging: stdout
-  - /hydra/hydra_logging: none
+# configs/experiment/bigge.yaml
+# @package _global_
+
+general:
+  name: bigge
+  gpus: 1
+  wandb: 'disabled'
+  resume: null
+  test_only: null
+  check_val_every_n_epochs: 10
+  sample_every_val: 5
+  samples_to_generate: 16
+  samples_to_save: 9
+  chains_to_save: 1
+
+train:
+  n_epochs: 100
+  batch_size: 8
+  save_model: True
+  num_workers: 0
 
 dataset:
   name: lobster
-  root: /home/richard/Projects/BiGG-E-Repo/extensions/train_graphs/lobster
+  root: data/bigge_lobster/
+  split: train
   n_bins: 10
-  split: train  # Will be overridden by train/val/test phases
-  num_workers: 4
+  pin_memory: False
+  molecules: False
+  spectre: False
 
 model:
-  node_dim: 1
-  edge_dim: 10
-  n_classes: 10  # same as edge_dim if categorical bins used
-  edge_hidden_dim: 64
-  node_hidden_dim: 64
+  diffusion_steps: 1000
+  n_layers: 4
+  num_degree: 10
+  edge_fraction: 0.1
+  lambda_train: [1, 1, 1]
+  extra_features: 'none'
+  hidden_mlp_dims: { 'X': 64, 'E': 64, 'y': 64 }
+  hidden_dims: { 'dx': 128, 'de': 64, 'dy': 64, 'n_head': 4, 'dim_ffX': 128, 'dim_ffE': 64, 'dim_ffy': 128 }
 
-trainer:
-  max_epochs: 5
-  batch_size: 16
-  log_every_n_steps: 1
-  accelerator: gpu
-  devices: 1
 
-val:
-  split: val
-test:
-  split: test
+
+
+# defaults:
+#   - _self_
+#   - /model: discrete
+# #  - dataset: custom  # We'll override this manually
+# #  - train: base
+# #  - val: base
+# #  - test: base
+#   - /hydra/job_logging: stdout
+#   - /hydra/hydra_logging: none
+# 
+# dataset:
+#   name: lobster
+#   root: /home/richard/Projects/BiGG-E-Repo/extensions/train_graphs/lobster
+#   n_bins: 10
+#   split: train  # Will be overridden by train/val/test phases
+#   num_workers: 4
+# 
+# model:
+#   node_dim: 1
+#   edge_dim: 10
+#   n_classes: 10  # same as edge_dim if categorical bins used
+#   edge_hidden_dim: 64
+#   node_hidden_dim: 64
+# 
+# trainer:
+#   max_epochs: 5
+#   batch_size: 16
+#   log_every_n_steps: 1
+#   accelerator: gpu
+#   devices: 1
+# 
+# val:
+#   split: val
+# test:
+#   split: test
