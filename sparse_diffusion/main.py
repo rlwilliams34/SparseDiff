@@ -110,7 +110,7 @@ def main(cfg: DictConfig):
 
         train_metrics = TrainMolecularMetricsDiscrete(dataset_infos)
     elif cfg.dataset.name == 'lobster':
-        from sparse_diffusion.datasets.lobster import *
+        from sparse_diffusion.datasets import lobster
         
         datamodule = lobster.LobsterDataModule(cfg)
         datamodule.setup()
