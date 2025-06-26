@@ -13,7 +13,7 @@ general:
   samples_to_save: 9
   chains_to_save: 1
   override dataset: lobster
-  extra_features: None
+  override model/extra_features: None
 
 train:
   n_epochs: 100
