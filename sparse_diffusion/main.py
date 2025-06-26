@@ -34,7 +34,8 @@ resource.setrlimit(
 def main(cfg: DictConfig):
     dataset_config = cfg["dataset"]
     pl.seed_everything(cfg.train.seed)
-    print("Dataset config")
+    print(dataset_config)
+    print(dataset_config["name"])
 
     print("creating datasets")
     if dataset_config["name"] in ["sbm", "comm20", "planar", "ego"]:
