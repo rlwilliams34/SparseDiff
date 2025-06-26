@@ -11,7 +11,7 @@ import torch_geometric.utils
 from torch_geometric.data import InMemoryDataset, download_url
 from hydra.utils import get_original_cwd
 from networkx import to_numpy_array
-
+from torch_geometric.loader import DataLoader
 from sparse_diffusion.utils import PlaceHolder
 from sparse_diffusion.datasets.abstract_dataset import (
     AbstractDataModule,
@@ -34,6 +34,8 @@ import os, pickle, torch
 from torch_geometric.data import InMemoryDataset, Data
 from sparse_diffusion.datasets.dataset_utils import graph_to_pyg_data  # If you move your conversion here
 from glob import glob
+from sparse_diffusion.datasets.extra_features import DummyExtraFeatures
+from sparse_diffusion.metrics.abstract_metrics import TrainAbstractMetricsDiscrete
 
 
 
