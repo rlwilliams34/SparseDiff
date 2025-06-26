@@ -107,8 +107,6 @@ class LobsterInfos:
             'y': 0                           # no global graph feature
         }
         
-        self.max_n_nodes = max([data.num_nodes for data in train_data])
-
     def __getitem__(self, item):
         return self.input_dims[item]
 
