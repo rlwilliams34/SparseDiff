@@ -106,6 +106,8 @@ class LobsterInfos:
             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
             'y': 0                           # no global graph feature
         }
+        
+        self.max_n_nodes = max([data.num_nodes for data in train_data])
 
     def __getitem__(self, item):
         return self.input_dims[item]
