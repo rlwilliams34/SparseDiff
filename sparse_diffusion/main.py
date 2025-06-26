@@ -110,11 +110,14 @@ def main(cfg: DictConfig):
 
         train_metrics = TrainMolecularMetricsDiscrete(dataset_infos)
     elif cfg.dataset.name == 'lobster':
-        from datasets.lobster import LobsterDataset
-        dataset = LobsterDataset(
-        root=cfg.dataset.root,
-        split=cfg.dataset.split,
-        n_bins=cfg.dataset.n_bins)
+        from sparse_diffusion.datasets.lobster import *
+        
+        datamodule = lobster.LobsterDataModule(cfg)
+        datamodule.setup()
+        dataset_infos = lobster.LobsterInfos(datamodule)
+        train_metrics = TrainAbstractMetricsDiscrete()
+        domain_features = DummyExtraFeatures()
+        dataloaders = datamodule.dataloaders
     
     else:
         raise NotImplementedError("Unknown dataset {}".format(cfg["dataset"]))

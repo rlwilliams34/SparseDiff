@@ -76,7 +76,37 @@ class LobsterDataset(InMemoryDataset):
 
 
 
+class LobsterDataModule:
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.batch_size = cfg.train.batch_size
+        self.root = cfg.dataset.root
+        self.n_bins = cfg.dataset.n_bins
 
+    def setup(self, stage=None):
+        self.train_dataset = LobsterDataset(root=self.root, split='train', n_bins=self.n_bins)
+        self.val_dataset = LobsterDataset(root=self.root, split='val', n_bins=self.n_bins)
+        self.test_dataset = LobsterDataset(root=self.root, split='test', n_bins=self.n_bins)
+
+    @property
+    def dataloaders(self):
+        return {
+            'train': DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True),
+            'val': DataLoader(self.val_dataset, batch_size=self.batch_size),
+            'test': DataLoader(self.test_dataset, batch_size=self.batch_size)
+        }
+
+class LobsterInfos:
+    def __init__(self, datamodule):
+        # You can extract this from dataset or hardcode it for now
+        self.input_dims = {
+            'X': 1,                          # one-hot node feature of dim 1
+            'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
+            'y': 0                           # no global graph feature
+        }
+
+    def __getitem__(self, item):
+        return self.input_dims[item]
 
 
 
