@@ -110,7 +110,7 @@ def main(cfg: DictConfig):
 
         train_metrics = TrainMolecularMetricsDiscrete(dataset_infos)
     elif cfg.dataset.name == 'lobster':
-        from datasets import dataset_utils
+        from datasets import lobster
         dataset = LobsterDataset(
         root=cfg.dataset.root,
         split=cfg.dataset.split,

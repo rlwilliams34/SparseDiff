@@ -32,7 +32,7 @@ from sparse_diffusion.metrics.metrics_utils import (
 
 import os, pickle, torch
 from torch_geometric.data import InMemoryDataset, Data
-from sparse_diffusion.datasets.utils import graph_to_pyg_data  # If you move your conversion here
+from sparse_diffusion.datasets.dataset_utils import graph_to_pyg_data  # If you move your conversion here
 from glob import glob
 
 
