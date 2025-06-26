@@ -123,6 +123,7 @@ def main(cfg: DictConfig):
         raise NotImplementedError("Unknown dataset {}".format(cfg["dataset"]))
 
     ef = cfg.model.extra_features
+    print("EF: ", ef)
     edge_f = cfg.model.edge_features
     extra_features = (
         ExtraFeatures(
