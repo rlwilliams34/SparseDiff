@@ -30,7 +30,7 @@ resource.setrlimit(
 )
 
 
-@hydra.main(version_base="1.3", config_path="../configs/experiment", config_name="config")
+@hydra.main(version_base="1.3", config_path="../configs", config_name="config")
 def main(cfg: DictConfig):
     dataset_config = cfg["dataset"]
     pl.seed_everything(cfg.train.seed)
