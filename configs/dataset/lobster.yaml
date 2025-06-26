@@ -1,0 +1,23 @@
+name: lobster
+root: /home/richard/Projects/BiGG-E-Repo/extensions/train_graphs/lobster
+split: train
+n_bins: 10
+pin_memory: False
+molecules: False
+spectre: False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

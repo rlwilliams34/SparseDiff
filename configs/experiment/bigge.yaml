@@ -22,7 +22,7 @@ train:
 
 dataset:
   name: lobster
-  root: data/bigge_lobster/
+  root: /home/richard/Projects/BiGG-E-Repo/extensions/train_graphs/lobster
   split: train
   n_bins: 10
   pin_memory: False
