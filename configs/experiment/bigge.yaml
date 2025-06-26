@@ -12,6 +12,7 @@ general:
   samples_to_generate: 16
   samples_to_save: 9
   chains_to_save: 1
+  override dataset: lobster
 
 train:
   n_epochs: 100
