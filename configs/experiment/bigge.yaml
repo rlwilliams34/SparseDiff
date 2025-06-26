@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - /model: gtrans_edge
+  - /model: discrete
 #  - dataset: custom  # We'll override this manually
 #  - train: base
 #  - val: base
