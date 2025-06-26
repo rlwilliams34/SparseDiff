@@ -30,7 +30,7 @@ def graph_to_pyg_data(g: nx.Graph, bins=None, n_bins = 10, global_max=None, glob
     #norm_weights = (edge_weights - global_min) / (global_max - global_min + 1e-8)
     
     # Discretize into bins
-    if bins are None:
+    if bins is None:
         bins = np.linspace(global_min, global_max, n_bins + 1)
     
     digitized = np.digitize(edge_weights, bins) - 1  # convert to 0-based bin index
