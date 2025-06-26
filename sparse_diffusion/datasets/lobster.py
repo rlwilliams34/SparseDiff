@@ -42,7 +42,7 @@ class LobsterDataset(InMemoryDataset):
         self.split = split
         self.n_bins = n_bins
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
         self.midpoints = None
         midpoint_path = os.path.join(self.processed_dir, f'{self.split}_midpoints.npy')
         if os.path.exists(midpoint_path):
