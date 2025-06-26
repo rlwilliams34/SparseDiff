@@ -109,6 +109,13 @@ def main(cfg: DictConfig):
             domain_features = DummyExtraFeatures()
 
         train_metrics = TrainMolecularMetricsDiscrete(dataset_infos)
+    elif cfg.dataset.name == 'lobster':
+        from dataset_utils import LobsterDataset
+        dataset = LobsterDataset(
+        root=cfg.dataset.root,
+        split=cfg.dataset.split,
+        n_bins=cfg.dataset.n_bins)
+    
     else:
         raise NotImplementedError("Unknown dataset {}".format(cfg["dataset"]))
 
