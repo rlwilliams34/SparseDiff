@@ -135,28 +135,75 @@ class LobsterDataModule(AbstractDataModule):
 
 class LobsterInfos(AbstractDatasetInfos):
     def __init__(self, datamodule):
+        self.name = "lobster"
+        self.is_molecular = False
         self.use_charge = False
-        self.num_node_types = 1
+        self.remove_h = False # ???
         self.num_edge_types = datamodule.n_bins
-        self.num_charge_types = 0
+        self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=self.num_edge_types, y=0)
+        
+        # 
+#         self.num_node_types = 1
+#         self.num_edge_types = datamodule.n_bins
+#         self.num_charge_types = 0
+# 
+#         # Dummy types
+#         self.node_types = torch.tensor([1.0])
+#         self.edge_types = torch.tensor([1.0] * self.num_edge_types)
+#         self.charge_types = torch.tensor([])
+# 
+#         # Dummy distributions
+#         self.nodes_dist = torch.tensor([1.0])
+#         self.edges_dist = torch.ones(self.num_edge_types)
+#         self.edges_dist = self.edges_dist / self.edges_dist.sum()
+#         self.max_n_nodes = 128  # Or extract max nodes from data
+# 
+#         self.output_dims = PlaceHolder(
+#             X=torch.tensor(self.num_node_types),
+#             E=torch.tensor(self.num_edge_types),
+#             y=torch.tensor(0),
+#             charge=torch.tensor([]),
+#         )
 
-        # Dummy types
-        self.node_types = torch.tensor([1.0])
-        self.edge_types = torch.tensor([1.0] * self.num_edge_types)
-        self.charge_types = torch.tensor([])
 
-        # Dummy distributions
-        self.nodes_dist = torch.tensor([1.0])
-        self.edges_dist = torch.ones(self.num_edge_types)
-        self.edges_dist = self.edges_dist / self.edges_dist.sum()
-        self.max_n_nodes = 128  # Or extract max nodes from data
+class GuacamolInfos(AbstractDatasetInfos):
+    def __init__(self, datamodule, cfg):
+        # basic information and settings
+        self.name = "guacamol"
+        self.is_molecular = True
+        self.use_charge = cfg.model.use_charge
+        self.remove_h = cfg.dataset.remove_h
 
-        self.output_dims = PlaceHolder(
-            X=torch.tensor(self.num_node_types),
-            E=torch.tensor(self.num_edge_types),
-            y=torch.tensor(0),
-            charge=torch.tensor([]),
-        )
+        # other statistics
+        self.statistics = datamodule.statistics
+        self.atom_encoder = atom_encoder
+        self.atom_decoder = atom_decoder
+        self.collapse_charge = torch.Tensor([-1, 0, 1]).int()
+        self.train_smiles = datamodule.train_dataset.smiles
+        super().complete_infos(datamodule.statistics, self.atom_encoder)
+
+        # dimensions, input_dims is calculated later
+        self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=5, y=0)
+
+        # dataset specific settings
+        self.valencies = [4, 3, 2, 1, 3, 1, 1, 1, 3, 2, 2, 4]
+        self.atom_weights = [
+            12,
+            14,
+            16,
+            19,
+            10.81,
+            79.9,
+            35.45,
+            126.9,
+            30.97,
+            32.06,
+            78.97,
+            28.09,
+        ]
+        self.max_weight = 1000
+
+
 
 # class LobsterInfos:
 #     def __init__(self, datamodule):
