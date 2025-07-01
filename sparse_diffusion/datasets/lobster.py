@@ -106,7 +106,7 @@ class LobsterInfos:
 #             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
 #             'y': 0                           # no global graph feature
 #         }
-        self.input_dims = PlaceHolder(X=torch.tensor(1), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0)# or None if that’s more correct for your setup)
+        self.input_dims = PlaceHolder(X=torch.tensor(1), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0))# or None if that’s more correct for your setup)
         self.num_node_features = 1
         self.num_edge_features = datamodule.train_dataset[0].edge_attr.size(-1)
         
