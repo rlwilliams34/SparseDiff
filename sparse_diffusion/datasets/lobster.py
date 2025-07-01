@@ -75,6 +75,7 @@ class LobsterDataset(InMemoryDataset):
         pyg_graphs = [graph_to_pyg_data(g, bins = bins, n_bins=self.n_bins, global_min=gmin, global_max=gmax) for g in nx_graphs]
 
         data, slices = self.collate(pyg_graphs)
+        print(data)
         torch.save((data, slices), self.processed_paths[0])
     
     def get_midpoints(self):
