@@ -119,8 +119,8 @@ class LobsterInfos(AbstractDatasetInfos):
         self.num_node_types = 1
         self.num_edge_types = datamodule.n_bins
         self.num_charge_types = 0
-        self.node_types = torch.tensor([1.0])
-        self.edge_types = torch.tensor([1.0] * self.num_edge_types)
+        self.node_types = torch.tensor([1.0], dtype = torch.long)
+        self.edge_types = torch.tensor([1.0] * self.num_edge_types, dtype = torch.long)
         self.charge_types = torch.tensor([])
         
         
