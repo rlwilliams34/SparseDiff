@@ -89,6 +89,9 @@ class LobsterDataModule:
         self.train_dataset = LobsterDataset(root=self.root, split='train', n_bins=self.n_bins)
         self.val_dataset = LobsterDataset(root=self.root, split='val', n_bins=self.n_bins)
         self.test_dataset = LobsterDataset(root=self.root, split='test', n_bins=self.n_bins)
+    
+    def prepare_data_per_node(self):
+        pass
 
     @property
     def dataloaders(self):
@@ -135,6 +138,7 @@ class LobsterInfos:
 
         # Just for compatibility, even if not used
         self.num_classes = None
+    
 
 
 
