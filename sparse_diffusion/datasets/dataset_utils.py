@@ -15,7 +15,6 @@ def graph_to_pyg_data(g: nx.Graph, bins=None, n_bins = 10, global_max=None, glob
     # --- NODE FEATURES ---
     num_nodes = g.number_of_nodes()
     x = torch.zeros((num_nodes, 1)).long()  # "null" node feature
-    print("HELLO")
     
     # --- EDGE INDEX ---
     edge_list = list(g.edges())
@@ -41,7 +40,7 @@ def graph_to_pyg_data(g: nx.Graph, bins=None, n_bins = 10, global_max=None, glob
     
     # One-hot encode edge features
     #edge_attr = torch.eye(n_bins)[digitized]
-    edge_attr = torch.tensor(digitized, dtype=torch.long).view(-1, 1)
+    edge_attr = torch.tensor(digitized, dtype=torch.long).view(-1, 1).squeeze(-1)
     
     # Create PyG Data object
     data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr)

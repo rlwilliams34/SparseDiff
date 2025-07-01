@@ -176,7 +176,6 @@ class AbstractDatasetInfos:
 
     def compute_input_dims(self, datamodule, extra_features, domain_features):
         data = next(iter(datamodule.train_dataloader()))
-        print(data.edge_attr)
         example_batch = self.to_one_hot(data)
         ex_dense, node_mask = utils.to_dense(
             example_batch.x,
