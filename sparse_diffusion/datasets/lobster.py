@@ -109,6 +109,14 @@ class LobsterInfos:
         
     def __getitem__(self, item):
         return self.input_dims[item]
+    
+    
+    def compute_input_dims(self):
+        return {
+            'num_node_features': self.num_node_features,
+            'num_edge_features': self.num_edge_features,
+            'num_classes': self.num_classes,
+        }
 
 
 
