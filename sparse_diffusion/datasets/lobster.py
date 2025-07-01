@@ -93,46 +93,6 @@ class LobsterDataModule(AbstractDataModule):
         }
         super().__init__(cfg, datasets)
 
-# class LobsterDataModule(pl.LightningDataModule):
-#     def __init__(self, cfg):
-#         super().__init__()
-#         self.cfg = cfg
-#         self.batch_size = cfg.train.batch_size
-#         self.root = cfg.dataset.root
-#         self.n_bins = cfg.dataset.n_bins
-#         self.split = cfg.dataset.split
-# 
-#     def prepare_data(self):
-#         # Called once, do things like downloading here (if needed)
-#         pass
-# 
-#     def setup(self, stage=None):
-#         from .lobster import LobsterDataset
-#         self.train_dataset = LobsterDataset(self.root, split="train", n_bins=self.n_bins)
-#         self.val_dataset = LobsterDataset(self.root, split="val", n_bins=self.n_bins)
-#         self.test_dataset = LobsterDataset(self.root, split="test", n_bins=self.n_bins)
-# 
-#     def train_dataloader(self):
-#         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
-# 
-#     def val_dataloader(self):
-#         return DataLoader(self.val_dataset, batch_size=self.batch_size)
-# 
-#     def test_dataloader(self):
-#         return DataLoader(self.test_dataset, batch_size=self.batch_size)
-#     
-#     @property
-#     def dataloaders(self):
-#         return {
-#             'train': DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True),
-#             'val': DataLoader(self.val_dataset, batch_size=self.batch_size),
-#             'test': DataLoader(self.test_dataset, batch_size=self.batch_size)
-#         }
-#     
-#     @property
-#     def allow_zero_length_dataloader_with_multiple_devices(self) -> bool:
-#         return True
-
 class LobsterInfos(AbstractDatasetInfos):
     def __init__(self, datamodule):
         self.name = "lobster"
@@ -142,108 +102,32 @@ class LobsterInfos(AbstractDatasetInfos):
         self.num_edge_types = datamodule.n_bins
         self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=self.num_edge_types, y=0)
         
-        # 
-#         self.num_node_types = 1
-#         self.num_edge_types = datamodule.n_bins
-#         self.num_charge_types = 0
-# 
-#         # Dummy types
-#         self.node_types = torch.tensor([1.0])
-#         self.edge_types = torch.tensor([1.0] * self.num_edge_types)
-#         self.charge_types = torch.tensor([])
-# 
-#         # Dummy distributions
-#         self.nodes_dist = torch.tensor([1.0])
-#         self.edges_dist = torch.ones(self.num_edge_types)
-#         self.edges_dist = self.edges_dist / self.edges_dist.sum()
-#         self.max_n_nodes = 128  # Or extract max nodes from data
-# 
-#         self.output_dims = PlaceHolder(
-#             X=torch.tensor(self.num_node_types),
-#             E=torch.tensor(self.num_edge_types),
-#             y=torch.tensor(0),
-#             charge=torch.tensor([]),
-#         )
+        self.num_node_types = 1
+        self.num_edge_types = datamodule.n_bins
+        self.num_charge_types = 0
+        self.node_types = torch.tensor([1.0])
+        self.edge_types = torch.tensor([1.0] * self.num_edge_types)
+        self.charge_types = torch.tensor([])
+        
+        train_n_nodes = datamodule.statistics["train"].num_nodes
+        val_n_nodes = datamodule.statistics["val"].num_nodes
+        test_n_nodes = datamodule.statistics["test"].num_nodes
+        max_n_nodes = max(
+            max(train_n_nodes.keys()), max(val_n_nodes.keys()), max(test_n_nodes.keys())
+        )
+        n_nodes = torch.zeros(max_n_nodes + 1, dtype=torch.long)
+        for c in [train_n_nodes, val_n_nodes, test_n_nodes]:
+            for key, value in c.items():
+                n_nodes[key] += value
+        self.n_nodes = n_nodes / n_nodes.sum()
 
+        self.max_n_nodes = len(n_nodes) - 1
+        self.nodes_dist = DistributionNodes(n_nodes)
 
-class GuacamolInfos(AbstractDatasetInfos):
-    def __init__(self, datamodule, cfg):
-        # basic information and settings
-        self.name = "guacamol"
-        self.is_molecular = True
-        self.use_charge = cfg.model.use_charge
-        self.remove_h = cfg.dataset.remove_h
-
-        # other statistics
-        self.statistics = datamodule.statistics
-        self.atom_encoder = atom_encoder
-        self.atom_decoder = atom_decoder
-        self.collapse_charge = torch.Tensor([-1, 0, 1]).int()
-        self.train_smiles = datamodule.train_dataset.smiles
-        super().complete_infos(datamodule.statistics, self.atom_encoder)
-
-        # dimensions, input_dims is calculated later
-        self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=5, y=0)
-
-        # dataset specific settings
-        self.valencies = [4, 3, 2, 1, 3, 1, 1, 1, 3, 2, 2, 4]
-        self.atom_weights = [
-            12,
-            14,
-            16,
-            19,
-            10.81,
-            79.9,
-            35.45,
-            126.9,
-            30.97,
-            32.06,
-            78.97,
-            28.09,
-        ]
-        self.max_weight = 1000
-
-
-
-# class LobsterInfos:
-#     def __init__(self, datamodule):
-#         # You can extract this from dataset or hardcode it for now
-# #         self.input_dims = {
-# #             'X': 1,                          # one-hot node feature of dim 1
-# #             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
-# #             'y': 0                           # no global graph feature
-# #         }
-#         self.input_dims = PlaceHolder(X=torch.tensor(1), charge = torch.tensor(0), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0)) # or None if that’s more correct for your setup)
-#         self.num_node_features = 1
-#         self.num_edge_features = datamodule.train_dataset[0].edge_attr.size(-1)
-#         
-#         self.is_molecular = False
-#         self.spectre = False
-#         self.output_dims = PlaceHolder(X=torch.tensor(1), charge = torch.tensor(0), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0))
-#         self.nodes_dist = torch.tensor([1.0])  # single "null" node type
-#         self.edges_dist = torch.ones(datamodule.n_bins)  # one per discretized edge class
-#         self.edge_types = self.edges_dist / self.edges_dist.sum()
-#         self.node_types = torch.tensor([1.0])
-#         
-#     def __getitem__(self, item):
-#         return self.input_dims[item]
-#     
-#     def compute_input_dims(self, datamodule=None, extra_features=None, domain_features=None):
-#         sample = datamodule.train_dataset[0]
-# 
-#         self.num_node_features = sample.x.shape[1]
-#         self.num_edge_features = sample.edge_attr.shape[1]
-# 
-#         # If using extra or domain features (not in your case), you'd expand dims here
-#         #if extra_features is not None:
-#         #    self.num_node_features += extra_features.num_features
-#         #if domain_features is not None:
-#         #    self.num_node_features += domain_features.num_features
-# 
-#         # Just for compatibility, even if not used
-#         self.num_classes = None
+        
     
-
+    
+    
 
 
 
