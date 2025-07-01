@@ -114,6 +114,7 @@ class LobsterInfos(AbstractDatasetInfos):
         self.use_charge = False
         self.remove_h = False # ???
         self.num_edge_types = datamodule.n_bins
+        self.spectre = False
         
         
         self.num_node_types = 1
