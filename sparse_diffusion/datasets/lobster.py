@@ -110,8 +110,7 @@ class LobsterInfos:
     def __getitem__(self, item):
         return self.input_dims[item]
     
-    
-def compute_input_dims(self, datamodule=None, extra_features=None, domain_features=None):
+    def compute_input_dims(self, datamodule=None, extra_features=None, domain_features=None):
         sample = datamodule.train_dataset[0]
 
         self.num_node_features = sample.x.shape[1]
