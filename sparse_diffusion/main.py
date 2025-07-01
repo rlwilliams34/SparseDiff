@@ -116,7 +116,7 @@ def main(cfg: DictConfig):
         dataset_infos = lobster.LobsterInfos(datamodule)
         train_metrics = TrainAbstractMetricsDiscrete()
         domain_features = DummyExtraFeatures()
-        dataloaders = datamodule.dataloaders
+        dataloaders = None
     
     else:
         raise NotImplementedError("Unknown dataset {}".format(cfg["dataset"]))
