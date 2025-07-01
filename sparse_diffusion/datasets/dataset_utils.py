@@ -14,7 +14,8 @@ import numpy as np
 def graph_to_pyg_data(g: nx.Graph, bins=None, n_bins = 10, global_max=None, global_min=None):
     # --- NODE FEATURES ---
     num_nodes = g.number_of_nodes()
-    x = torch.ones((num_nodes, 1))  # "null" node feature
+    x = torch.zeros((num_nodes, 1)).long()  # "null" node feature
+    print("HELLO")
     
     # --- EDGE INDEX ---
     edge_list = list(g.edges())
