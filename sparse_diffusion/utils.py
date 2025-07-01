@@ -30,8 +30,9 @@ def setup_wandb(cfg):
         "reinit": True,
         "mode": cfg.general.wandb,
     }
-    wandb.init(**kwargs)
-    wandb.save("*.txt")
+    if cfg.general.wandb != 'disabled':
+        wandb.init(**kwargs)
+        wandb.save("*.txt")
     return cfg
 
 
