@@ -383,7 +383,6 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             # pass sparse comp_graph to dense comp_graph for ease calculation
             sparse_noisy_data["comp_edge_index_t"] = comp_edge_index
             sparse_noisy_data["comp_edge_attr_t"] = comp_edge_attr
-            print(sparse_noisy_data)
             sparse_pred = self.forward(sparse_noisy_data)
             all_node = sparse_pred.node
             all_charge = sparse_pred.charge
