@@ -124,6 +124,9 @@ def main(cfg: DictConfig):
 
     ef = cfg.model.extra_features
     print("EF: ", ef)
+    ef = None
+    
+    
     edge_f = cfg.model.edge_features
     extra_features = (
         ExtraFeatures(
