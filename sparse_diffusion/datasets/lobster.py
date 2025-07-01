@@ -111,12 +111,20 @@ class LobsterInfos:
         return self.input_dims[item]
     
     
-    def compute_input_dims(self):
-        return {
-            'num_node_features': self.num_node_features,
-            'num_edge_features': self.num_edge_features,
-            'num_classes': self.num_classes,
-        }
+def compute_input_dims(self, datamodule=None, extra_features=None, domain_features=None):
+        sample = datamodule.train_dataset[0]
+
+        self.num_node_features = sample.x.shape[1]
+        self.num_edge_features = sample.edge_attr.shape[1]
+
+        # If using extra or domain features (not in your case), you'd expand dims here
+        if extra_features is not None:
+            self.num_node_features += extra_features.num_features
+        if domain_features is not None:
+            self.num_node_features += domain_features.num_features
+
+        # Just for compatibility, even if not used
+        self.num_classes = None
 
 
 
