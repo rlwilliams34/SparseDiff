@@ -36,6 +36,7 @@ def main(cfg: DictConfig):
     pl.seed_everything(cfg.train.seed)
     print(dataset_config)
     print(dataset_config["name"])
+    cfg.train.batch_size = 1
 
     print("creating datasets")
     if dataset_config["name"] in ["sbm", "comm20", "planar", "ego"]:
