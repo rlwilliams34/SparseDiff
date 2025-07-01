@@ -180,6 +180,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             return
         # Map discrete classes to one hot encoding
         data = self.dataset_info.to_one_hot(data)
+        print(data)
 
         sparse_noisy_data = self.apply_sparse_noise(data)
         # Sample the query edges and build the computational graph = union(noisy graph, query edges)
