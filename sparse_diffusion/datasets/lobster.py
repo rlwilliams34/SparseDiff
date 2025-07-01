@@ -53,7 +53,6 @@ class LobsterDataset(InMemoryDataset):
         midpoint_path = os.path.join(self.processed_dir, f'{self.split}_midpoints.npy')
         if os.path.exists(midpoint_path):
             self.midpoints = np.load(midpoint_path)
-        print(self.data)
         
 
     @property

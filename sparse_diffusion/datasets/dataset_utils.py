@@ -39,7 +39,8 @@ def graph_to_pyg_data(g: nx.Graph, bins=None, n_bins = 10, global_max=None, glob
     digitized = np.clip(digitized, 0, n_bins - 1)
     
     # One-hot encode edge features
-    edge_attr = torch.eye(n_bins)[digitized]
+    #edge_attr = torch.eye(n_bins)[digitized]
+    edge_attr = torch.tensor(digitized, dtype=torch.long).view(-1, 1)
     
     # Create PyG Data object
     data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
