@@ -113,7 +113,6 @@ def main(cfg: DictConfig):
         from sparse_diffusion.datasets import lobster
         
         datamodule = lobster.LobsterDataModule(cfg)
-        datamodule.setup()
         dataset_infos = lobster.LobsterInfos(datamodule)
         train_metrics = TrainAbstractMetricsDiscrete()
         domain_features = DummyExtraFeatures()
