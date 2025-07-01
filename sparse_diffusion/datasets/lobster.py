@@ -109,6 +109,9 @@ class LobsterInfos:
         self.is_molecular = False
         self.spectre = False
         self.output_dims = {}
+        self.nodes_dist = torch.tensor([1.0])  # single "null" node type
+        self.edges_dist = torch.ones(datamodule.n_bins)  # one per discretized edge class
+        self.edges_dist = self.edges_dist / self.edges_dist.sum()
         
     def __getitem__(self, item):
         return self.input_dims[item]
