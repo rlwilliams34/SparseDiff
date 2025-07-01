@@ -84,7 +84,6 @@ class LobsterDataModule:
         self.batch_size = cfg.train.batch_size
         self.root = cfg.dataset.root
         self.n_bins = cfg.dataset.n_bins
-        self.is_molecular = False
 
     def setup(self, stage=None):
         self.train_dataset = LobsterDataset(root=self.root, split='train', n_bins=self.n_bins)
@@ -107,6 +106,7 @@ class LobsterInfos:
             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
             'y': 0                           # no global graph feature
         }
+        self.is_molecular = False
         
     def __getitem__(self, item):
         return self.input_dims[item]
