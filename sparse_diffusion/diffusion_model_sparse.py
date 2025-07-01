@@ -218,6 +218,11 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         )
 
         query_true_edge_attr = true_comp_edge_attr[query_mask2]
+        
+        print(query_mask2)
+        print(true_comp_edge_index[:, query_mask2])
+        print(sparse_pred.edge_index)
+        
         assert (
             true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
         ).all()
