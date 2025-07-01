@@ -122,6 +122,7 @@ def main(cfg: DictConfig):
     else:
         raise NotImplementedError("Unknown dataset {}".format(cfg["dataset"]))
 
+    cfg.model.extra_features = None
     ef = cfg.model.extra_features
     print("EF: ", ef)
     #ef = None
