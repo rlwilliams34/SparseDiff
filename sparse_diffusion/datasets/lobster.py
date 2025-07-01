@@ -92,6 +92,18 @@ class LobsterDataModule(AbstractDataModule):
             "test": LobsterDataset(cfg.dataset.root, split="test", n_bins=self.n_bins),
         }
         super().__init__(cfg, datasets)
+        self.dataset_stat()
+    
+    def dataset_stat(self):
+        self.statistics = {"train": {}, "val": {}, "test": {}}
+        for split_name, dataset in [("train", self.train_dataset),
+                                    ("val", self.val_dataset),
+                                    ("test", self.test_dataset)]:
+            num_nodes = {}
+            for graph in dataset:
+                n = graph.num_nodes
+                num_nodes[n] = num_nodes.get(n, 0) + 1
+            self.statistics[split_name]["num_nodes"] = num_nodes
 
 class LobsterInfos(AbstractDatasetInfos):
     def __init__(self, datamodule):
