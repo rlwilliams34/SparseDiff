@@ -100,7 +100,7 @@ class LobsterInfos(AbstractDatasetInfos):
         self.use_charge = False
         self.remove_h = False # ???
         self.num_edge_types = datamodule.n_bins
-        self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=self.num_edge_types, y=0)
+        
         
         self.num_node_types = 1
         self.num_edge_types = datamodule.n_bins
@@ -109,6 +109,8 @@ class LobsterInfos(AbstractDatasetInfos):
         self.edge_types = torch.tensor([1.0] * self.num_edge_types)
         self.charge_types = torch.tensor([])
         
+        
+        self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=self.num_edge_types, y=0)
         train_n_nodes = datamodule.statistics["train"].num_nodes
         val_n_nodes = datamodule.statistics["val"].num_nodes
         test_n_nodes = datamodule.statistics["test"].num_nodes
