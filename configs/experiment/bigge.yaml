@@ -4,7 +4,6 @@
 general:
   name: bigge
   gpus: 1
-  wandb: 'disabled'
   resume: null
   test_only: null
   check_val_every_n_epochs: 10
