@@ -106,12 +106,15 @@ class LobsterInfos:
             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
             'y': 0                           # no global graph feature
         }
+        self.num_node_features = 1
+        self.num_edge_features = datamodule.train_dataset[0].edge_attr.size(-1)
+        
         self.is_molecular = False
         self.spectre = False
         self.output_dims = PlaceHolder(
-            X=torch.tensor(self.num_node_features),
-            E=torch.tensor(self.num_edge_features),
-            y=torch.tensor(0)  # assuming no supervised labels
+            X=torch.tensor(self.input_dims['X']),
+            E=torch.tensor(self.input_dims['E']),
+            y=torch.tensor(self.input_dims['y'])  # assuming no supervised labels
         )
         self.nodes_dist = torch.tensor([1.0])  # single "null" node type
         self.edges_dist = torch.ones(datamodule.n_bins)  # one per discretized edge class
