@@ -219,10 +219,6 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
 
         query_true_edge_attr = true_comp_edge_attr[query_mask2]
         
-        print(query_mask2)
-        print(true_comp_edge_index[:, query_mask2])
-        print(sparse_pred.edge_index)
-        
         assert (
             true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
         ).all()
@@ -1638,6 +1634,8 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         """At every training step (after adding noise) and step in sampling, compute extra information and append to
         the network input."""
         # get extra features
+        print(sparse_noisy_data)
+        print(sparse_noisy_data.E)
         extra_data = self.extra_features(sparse_noisy_data)
         if type(extra_data) == tuple:
             extra_data = extra_data[0]
