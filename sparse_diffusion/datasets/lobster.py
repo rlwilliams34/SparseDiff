@@ -29,6 +29,7 @@ from sparse_diffusion.metrics.metrics_utils import (
     edge_counts,
 )
 
+import pytorch_lightning as pl
 from sparse_diffusion.utils import PlaceHolder
 import os, pickle, torch
 from torch_geometric.data import InMemoryDataset, Data
@@ -78,28 +79,31 @@ class LobsterDataset(InMemoryDataset):
 
 
 
-class LobsterDataModule:
+class LobsterDataModule(pl.LightningDataModule):
     def __init__(self, cfg):
+        super().__init__()
         self.cfg = cfg
         self.batch_size = cfg.train.batch_size
         self.root = cfg.dataset.root
         self.n_bins = cfg.dataset.n_bins
+        self.split = cfg.dataset.split
+
+    def prepare_data(self):
+        # Called once, do things like downloading here (if needed)
+        pass
 
     def setup(self, stage=None):
-        self.train_dataset = LobsterDataset(root=self.root, split='train', n_bins=self.n_bins)
-        self.val_dataset = LobsterDataset(root=self.root, split='val', n_bins=self.n_bins)
-        self.test_dataset = LobsterDataset(root=self.root, split='test', n_bins=self.n_bins)
-    
-    def prepare_data_per_node(self):
-        pass
-        
-    def prepare_data(self):
-        pass
-    
+        from .lobster import LobsterDataset
+        self.train_dataset = LobsterDataset(self.root, split="train", n_bins=self.n_bins)
+        self.val_dataset = LobsterDataset(self.root, split="val", n_bins=self.n_bins)
+        self.test_dataset = LobsterDataset(self.root, split="test", n_bins=self.n_bins)
+
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
+
     def val_dataloader(self):
         return DataLoader(self.val_dataset, batch_size=self.batch_size)
+
     def test_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=self.batch_size)
     
