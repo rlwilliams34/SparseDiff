@@ -103,6 +103,10 @@ class LobsterDataModule:
             'val': DataLoader(self.val_dataset, batch_size=self.batch_size),
             'test': DataLoader(self.test_dataset, batch_size=self.batch_size)
         }
+    
+    @property
+    def allow_zero_length_dataloader_with_multiple_devices(self) -> bool:
+        return True
 
 class LobsterInfos:
     def __init__(self, datamodule):
