@@ -1156,6 +1156,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         noisy data contains: node_t, comp_edge_index_t, comp_edge_attr_t, batch
         """
         # build the sparse_noisy_data for the forward function of the sparse model
+        print(noisy_data)
         sparse_noisy_data = self.compute_extra_data(sparse_noisy_data=noisy_data)
 
         if self.sign_net and self.cfg.model.extra_features == "all":
