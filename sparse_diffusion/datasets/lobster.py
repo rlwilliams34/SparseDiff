@@ -108,6 +108,7 @@ class LobsterInfos:
         }
         self.is_molecular = False
         self.spectre = False
+        self.output_dims = {}
         
     def __getitem__(self, item):
         return self.input_dims[item]
