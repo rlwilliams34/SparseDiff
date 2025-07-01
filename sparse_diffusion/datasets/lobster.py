@@ -133,43 +133,68 @@ class LobsterDataModule(AbstractDataModule):
 #     def allow_zero_length_dataloader_with_multiple_devices(self) -> bool:
 #         return True
 
-class LobsterInfos:
+class LobsterInfos(AbstractDatasetInfos):
     def __init__(self, datamodule):
-        # You can extract this from dataset or hardcode it for now
-#         self.input_dims = {
-#             'X': 1,                          # one-hot node feature of dim 1
-#             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
-#             'y': 0                           # no global graph feature
-#         }
-        self.input_dims = PlaceHolder(X=torch.tensor(1), charge = torch.tensor(0), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0)) # or None if that’s more correct for your setup)
-        self.num_node_features = 1
-        self.num_edge_features = datamodule.train_dataset[0].edge_attr.size(-1)
-        
-        self.is_molecular = False
-        self.spectre = False
-        self.output_dims = PlaceHolder(X=torch.tensor(1), charge = torch.tensor(0), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0))
-        self.nodes_dist = torch.tensor([1.0])  # single "null" node type
-        self.edges_dist = torch.ones(datamodule.n_bins)  # one per discretized edge class
-        self.edge_types = self.edges_dist / self.edges_dist.sum()
+        self.use_charge = False
+        self.num_node_types = 1
+        self.num_edge_types = datamodule.n_bins
+        self.num_charge_types = 0
+
+        # Dummy types
         self.node_types = torch.tensor([1.0])
-        
-    def __getitem__(self, item):
-        return self.input_dims[item]
-    
-    def compute_input_dims(self, datamodule=None, extra_features=None, domain_features=None):
-        sample = datamodule.train_dataset[0]
+        self.edge_types = torch.tensor([1.0] * self.num_edge_types)
+        self.charge_types = torch.tensor([])
 
-        self.num_node_features = sample.x.shape[1]
-        self.num_edge_features = sample.edge_attr.shape[1]
+        # Dummy distributions
+        self.nodes_dist = torch.tensor([1.0])
+        self.edges_dist = torch.ones(self.num_edge_types)
+        self.edges_dist = self.edges_dist / self.edges_dist.sum()
+        self.max_n_nodes = 128  # Or extract max nodes from data
 
-        # If using extra or domain features (not in your case), you'd expand dims here
-        #if extra_features is not None:
-        #    self.num_node_features += extra_features.num_features
-        #if domain_features is not None:
-        #    self.num_node_features += domain_features.num_features
+        self.output_dims = PlaceHolder(
+            X=torch.tensor(self.num_node_types),
+            E=torch.tensor(self.num_edge_types),
+            y=torch.tensor(0),
+            charge=torch.tensor([]),
+        )
 
-        # Just for compatibility, even if not used
-        self.num_classes = None
+# class LobsterInfos:
+#     def __init__(self, datamodule):
+#         # You can extract this from dataset or hardcode it for now
+# #         self.input_dims = {
+# #             'X': 1,                          # one-hot node feature of dim 1
+# #             'E': datamodule.train_dataset[0].edge_attr.size(-1),  # num edge bins
+# #             'y': 0                           # no global graph feature
+# #         }
+#         self.input_dims = PlaceHolder(X=torch.tensor(1), charge = torch.tensor(0), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0)) # or None if that’s more correct for your setup)
+#         self.num_node_features = 1
+#         self.num_edge_features = datamodule.train_dataset[0].edge_attr.size(-1)
+#         
+#         self.is_molecular = False
+#         self.spectre = False
+#         self.output_dims = PlaceHolder(X=torch.tensor(1), charge = torch.tensor(0), E=torch.tensor(datamodule.train_dataset[0].edge_attr.size(-1)), y=torch.tensor(0))
+#         self.nodes_dist = torch.tensor([1.0])  # single "null" node type
+#         self.edges_dist = torch.ones(datamodule.n_bins)  # one per discretized edge class
+#         self.edge_types = self.edges_dist / self.edges_dist.sum()
+#         self.node_types = torch.tensor([1.0])
+#         
+#     def __getitem__(self, item):
+#         return self.input_dims[item]
+#     
+#     def compute_input_dims(self, datamodule=None, extra_features=None, domain_features=None):
+#         sample = datamodule.train_dataset[0]
+# 
+#         self.num_node_features = sample.x.shape[1]
+#         self.num_edge_features = sample.edge_attr.shape[1]
+# 
+#         # If using extra or domain features (not in your case), you'd expand dims here
+#         #if extra_features is not None:
+#         #    self.num_node_features += extra_features.num_features
+#         #if domain_features is not None:
+#         #    self.num_node_features += domain_features.num_features
+# 
+#         # Just for compatibility, even if not used
+#         self.num_classes = None
     
 
 
