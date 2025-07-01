@@ -29,7 +29,7 @@ from sparse_diffusion.metrics.metrics_utils import (
     edge_counts,
 )
 
-
+from sparse_diffusion.utils import PlaceHolder
 import os, pickle, torch
 from torch_geometric.data import InMemoryDataset, Data
 from sparse_diffusion.datasets.dataset_utils import graph_to_pyg_data  # If you move your conversion here
@@ -108,7 +108,11 @@ class LobsterInfos:
         }
         self.is_molecular = False
         self.spectre = False
-        self.output_dims = {}
+        self.output_dims = PlaceHolder(
+            X=torch.tensor(self.num_node_features),
+            E=torch.tensor(self.num_edge_features),
+            y=torch.tensor(0)  # assuming no supervised labels
+        )
         self.nodes_dist = torch.tensor([1.0])  # single "null" node type
         self.edges_dist = torch.ones(datamodule.n_bins)  # one per discretized edge class
         self.edges_dist = self.edges_dist / self.edges_dist.sum()
