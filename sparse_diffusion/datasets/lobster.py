@@ -36,6 +36,8 @@ from torch_geometric.data import InMemoryDataset, Data
 from sparse_diffusion.datasets.dataset_utils import graph_to_pyg_data  # If you move your conversion here
 from glob import glob
 from sparse_diffusion.datasets.abstract_dataset import AbstractDataModule, AbstractDatasetInfos
+from sparse_diffusion.diffusion.distributions import DistributionNodes
+
 #from sparse_diffusion.datasets.extra_features import DummyExtraFeatures
 #from sparse_diffusion.metrics.abstract_metrics import TrainAbstractMetricsDiscrete
 
