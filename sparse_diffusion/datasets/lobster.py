@@ -123,9 +123,9 @@ class LobsterInfos(AbstractDatasetInfos):
         
         
         self.output_dims = PlaceHolder(X=self.num_node_types, charge=self.num_charge_types, E=self.num_edge_types, y=0)
-        train_n_nodes = datamodule.statistics["train"].num_nodes
-        val_n_nodes = datamodule.statistics["val"].num_nodes
-        test_n_nodes = datamodule.statistics["test"].num_nodes
+        train_n_nodes = datamodule.statistics["train"]["num_nodes"]
+        val_n_nodes = datamodule.statistics["val"]["num_nodes"]
+        test_n_nodes = datamodule.statistics["test"]["num_nodes"]
         max_n_nodes = max(
             max(train_n_nodes.keys()), max(val_n_nodes.keys()), max(test_n_nodes.keys())
         )
