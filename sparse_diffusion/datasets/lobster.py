@@ -107,6 +107,7 @@ class LobsterInfos:
             'y': 0                           # no global graph feature
         }
         self.is_molecular = False
+        self.spectre = False
         
     def __getitem__(self, item):
         return self.input_dims[item]
