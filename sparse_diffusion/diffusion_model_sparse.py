@@ -776,7 +776,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         # count number of non-existing edges for each graph
         
         #num_neg_edge = ((num_nodes - 1) * num_nodes - num_edges) / 2  # (bs, )
-        num_neg_edge = (num_nodes - 1) * num_nodes) / 2  - num_edges
+        num_neg_edge = ((num_nodes - 1) * num_nodes) / 2  - num_edges
         num_neg_edge = num_neg_edge.int()
 
         # Step1: diffuse on existing edges
