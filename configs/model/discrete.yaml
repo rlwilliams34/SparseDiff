@@ -9,7 +9,7 @@ scaling_layer: False
 
 extra_features: 'all'        # 'all', 'cycles', or null
 eigenfeatures: True
-edge_features: 'all'          # 'all', 'dist', 'localngbs' or null
+edge_features: null         # 'all', 'dist', 'localngbs' or null
 num_eigenvectors: 8       # eigenvectors
 num_eigenvalues: 5      # eigenvalues
 use_charge: False
