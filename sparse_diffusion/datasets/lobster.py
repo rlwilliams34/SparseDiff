@@ -92,7 +92,10 @@ class LobsterDataModule:
     
     def prepare_data_per_node(self):
         pass
-
+        
+    def prepare_data(self):
+        pass
+    
     @property
     def dataloaders(self):
         return {
