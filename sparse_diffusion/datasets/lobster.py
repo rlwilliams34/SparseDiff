@@ -35,6 +35,7 @@ import os, pickle, torch
 from torch_geometric.data import InMemoryDataset, Data
 from sparse_diffusion.datasets.dataset_utils import graph_to_pyg_data  # If you move your conversion here
 from glob import glob
+from sparse_diffusion.datasets.abstract_dataset import AbstractDataModule, AbstractDatasetInfos
 #from sparse_diffusion.datasets.extra_features import DummyExtraFeatures
 #from sparse_diffusion.metrics.abstract_metrics import TrainAbstractMetricsDiscrete
 
@@ -79,45 +80,58 @@ class LobsterDataset(InMemoryDataset):
 
 
 
-class LobsterDataModule(pl.LightningDataModule):
+class LobsterDataModule(AbstractDataModule):
     def __init__(self, cfg):
-        super().__init__()
+        from .lobster import LobsterDataset
         self.cfg = cfg
         self.batch_size = cfg.train.batch_size
-        self.root = cfg.dataset.root
         self.n_bins = cfg.dataset.n_bins
-        self.split = cfg.dataset.split
-
-    def prepare_data(self):
-        # Called once, do things like downloading here (if needed)
-        pass
-
-    def setup(self, stage=None):
-        from .lobster import LobsterDataset
-        self.train_dataset = LobsterDataset(self.root, split="train", n_bins=self.n_bins)
-        self.val_dataset = LobsterDataset(self.root, split="val", n_bins=self.n_bins)
-        self.test_dataset = LobsterDataset(self.root, split="test", n_bins=self.n_bins)
-
-    def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
-
-    def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.batch_size)
-
-    def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size)
-    
-    @property
-    def dataloaders(self):
-        return {
-            'train': DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True),
-            'val': DataLoader(self.val_dataset, batch_size=self.batch_size),
-            'test': DataLoader(self.test_dataset, batch_size=self.batch_size)
+        datasets = {
+            "train": LobsterDataset(cfg.dataset.root, split="train", n_bins=self.n_bins),
+            "val": LobsterDataset(cfg.dataset.root, split="val", n_bins=self.n_bins),
+            "test": LobsterDataset(cfg.dataset.root, split="test", n_bins=self.n_bins),
         }
-    
-    @property
-    def allow_zero_length_dataloader_with_multiple_devices(self) -> bool:
-        return True
+        super().__init__(cfg, datasets)
+
+# class LobsterDataModule(pl.LightningDataModule):
+#     def __init__(self, cfg):
+#         super().__init__()
+#         self.cfg = cfg
+#         self.batch_size = cfg.train.batch_size
+#         self.root = cfg.dataset.root
+#         self.n_bins = cfg.dataset.n_bins
+#         self.split = cfg.dataset.split
+# 
+#     def prepare_data(self):
+#         # Called once, do things like downloading here (if needed)
+#         pass
+# 
+#     def setup(self, stage=None):
+#         from .lobster import LobsterDataset
+#         self.train_dataset = LobsterDataset(self.root, split="train", n_bins=self.n_bins)
+#         self.val_dataset = LobsterDataset(self.root, split="val", n_bins=self.n_bins)
+#         self.test_dataset = LobsterDataset(self.root, split="test", n_bins=self.n_bins)
+# 
+#     def train_dataloader(self):
+#         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
+# 
+#     def val_dataloader(self):
+#         return DataLoader(self.val_dataset, batch_size=self.batch_size)
+# 
+#     def test_dataloader(self):
+#         return DataLoader(self.test_dataset, batch_size=self.batch_size)
+#     
+#     @property
+#     def dataloaders(self):
+#         return {
+#             'train': DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True),
+#             'val': DataLoader(self.val_dataset, batch_size=self.batch_size),
+#             'test': DataLoader(self.test_dataset, batch_size=self.batch_size)
+#         }
+#     
+#     @property
+#     def allow_zero_length_dataloader_with_multiple_devices(self) -> bool:
+#         return True
 
 class LobsterInfos:
     def __init__(self, datamodule):
