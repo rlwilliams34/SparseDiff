@@ -117,10 +117,10 @@ class LobsterInfos:
         self.num_edge_features = sample.edge_attr.shape[1]
 
         # If using extra or domain features (not in your case), you'd expand dims here
-        if extra_features is not None:
-            self.num_node_features += extra_features.num_features
-        if domain_features is not None:
-            self.num_node_features += domain_features.num_features
+        #if extra_features is not None:
+        #    self.num_node_features += extra_features.num_features
+        #if domain_features is not None:
+        #    self.num_node_features += domain_features.num_features
 
         # Just for compatibility, even if not used
         self.num_classes = None
