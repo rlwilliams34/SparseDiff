@@ -765,10 +765,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             charge_t = data.charge
 
         # Diffuse sparse nodes and sample sparse node labels
-        print(data.x)
-        print(data.x.shape)
         probN = data.x.unsqueeze(1) @ Qtb.X[data.batch]  # (N, dx)
-        print(probN.shape)
         node_t = probN.squeeze(1).multinomial(1).flatten()  # (N, )
         # count node numbers and edge numbers for existing edges for each graph
         num_nodes = data.ptr.diff().long()
