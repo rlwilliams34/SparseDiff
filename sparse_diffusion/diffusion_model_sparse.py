@@ -774,9 +774,10 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         unique, counts = torch.unique(batch_edge, sorted=True, return_counts=True)
         num_edges[unique] = counts.float()
         # count number of non-existing edges for each graph
-        print(num_nodes)
-        print(num_edges)
-        num_neg_edge = ((num_nodes - 1) * num_nodes - num_edges) / 2  # (bs, )
+        
+        #num_neg_edge = ((num_nodes - 1) * num_nodes - num_edges) / 2  # (bs, )
+        num_neg_edge = (num_nodes - 1) * num_nodes) / 2  - num_edges
+        num_neg_edge = num_neg_edge.int()
 
         # Step1: diffuse on existing edges
         # get edges defined in the top triangle of the adjacency matrix
