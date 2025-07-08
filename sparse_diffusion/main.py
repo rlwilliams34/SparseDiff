@@ -34,7 +34,7 @@ resource.setrlimit(
 def main(cfg: DictConfig):
     dataset_config = cfg["dataset"]
     pl.seed_everything(cfg.train.seed)
-    cfg.train.batch_size = 1
+    cfg.train.batch_size = 50
     cfg.experiment.train.batch_size = 1
     cfg.model.extra_features = None
     cfg.model.edge_fraction = 0.1
@@ -208,8 +208,9 @@ def main(cfg: DictConfig):
         fast_dev_run=cfg.general.name == "debug",
         callbacks=callbacks,
         log_every_n_steps=50 if name != "debug" else 1,
-        enable_progress_bar=False,
+        enable_progress_bar=True,
         logger=[],
+        enable_model_summary=True
     )
 
     if not cfg.general.test_only and not cfg.general.generated_path:
