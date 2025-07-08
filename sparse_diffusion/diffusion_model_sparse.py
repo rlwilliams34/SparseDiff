@@ -219,9 +219,11 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             edge_attr=data.edge_attr,
             num_classes=self.out_dims.E,
         )
-        query_true_edge_attr = true_comp_edge_attr[query_mask2]
         
-        query_mask2 = query_mask
+        pred_edge_set = set(map(tuple, sparse_pred.edge_index.t().tolist()))
+        true_edge_list = list(map(tuple, true_comp_edge_index.t().tolist()))
+        query_mask2 = torch.tensor([e in pred_edge_set for e in true_edge_list], device=true_comp_edge_index.device)
+        query_true_edge_attr = true_comp_edge_attr[query_mask2]
         assert (
             true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
         ).all()
