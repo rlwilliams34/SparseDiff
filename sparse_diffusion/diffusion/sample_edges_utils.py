@@ -120,63 +120,9 @@ def get_computational_graph(
     return query_mask, max_comp_edge_index, comp_edge_attr
 
 
-# def get_computational_graph(query_edge_index,clean_edge_index,clean_edge_attr):
-#     """
-#     Build computational graph from clean + query edges.
-#     Returns a query mask, final edge index, and one-hot edge attributes.
-#     """
-#     de = clean_edge_attr.shape[-1]
-#     device = query_edge_index.device
-# 
-#     # default query edge attr: class 0
-#     default_query_edge_attr = torch.zeros((query_edge_index.shape[1], de), device=device)
-#     default_query_edge_attr[:, 0] = 1
-# 
-#     # combine clean + query
-#     comp_edge_index = torch.hstack([clean_edge_index, query_edge_index])
-#     default_comp_edge_attr = torch.argmax(
-#         torch.vstack([clean_edge_attr, default_query_edge_attr]), dim=-1
-#     )
-# 
-#     # coalesce and track which are query edges
-#     _, min_edge_attr = coalesce(comp_edge_index, default_comp_edge_attr, reduce="min")
-#     final_edge_index, max_edge_attr = coalesce(comp_edge_index, default_comp_edge_attr, reduce="max")
-# 
-#     query_mask = (min_edge_attr == 0)  # query edges were tagged with class 0
-#     comp_edge_attr = F.one_hot(max_edge_attr, num_classes=de).float()
-# 
-#     return query_mask, final_edge_index, comp_edge_attr
-
-
-# def mask_query_graph_from_comp_graph(query_edge_index,edge_index,edge_attr,num_classes):
-#     """
-#     Merge query edges with clean edges, and extract mask + final edge features.
-#     Used to match predicted query edge locations with ground truth.
-#     """
-#     all_edge_index = torch.hstack([edge_index, query_edge_index])
-#     all_edge_attr = torch.hstack([
-#         torch.argmax(edge_attr, -1),
-#         torch.zeros(query_edge_index.shape[1], device=edge_index.device)])
-#     
-#     _, min_edge_attr = coalesce(all_edge_index, all_edge_attr, reduce="min")
-#     final_edge_index, max_edge_attr = coalesce(all_edge_index, all_edge_attr, reduce="max")
-#     
-#     query_mask = (min_edge_attr == 0)
-#     final_edge_attr = F.one_hot(max_edge_attr, num_classes=num_classes)
-#     
-#     return query_mask, final_edge_attr, final_edge_index
 
 
 
-
-
-def check_symmetry(edge_index):
-    cond1 = edge_index[0].sort()[0].equal(edge_index[1].sort()[0])
-    cond2 = (edge_index[0] < edge_index[1]).sum() == (
-        edge_index[1] < edge_index[0]
-    ).sum()
-    print((edge_index[0] < edge_index[1]).sum(), (edge_index[1] < edge_index[0]).sum())
-    return cond1 and cond2
 
 
 def mask_query_graph_from_comp_graph(
@@ -205,6 +151,16 @@ def mask_query_graph_from_comp_graph(
         F.one_hot(max_edge_attr.long(), num_classes=num_classes),
         max_edge_index,
     )
+
+
+def check_symmetry(edge_index):
+    cond1 = edge_index[0].sort()[0].equal(edge_index[1].sort()[0])
+    cond2 = (edge_index[0] < edge_index[1]).sum() == (
+        edge_index[1] < edge_index[0]
+    ).sum()
+    print((edge_index[0] < edge_index[1]).sum(), (edge_index[1] < edge_index[0]).sum())
+    return cond1 and cond2
+
 
 
 def sample_non_existing_edge_attr(query_edges_dist_batch, num_edges_to_sample):
