@@ -175,6 +175,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         # The above code is using the Python debugger module `pdb` to set a breakpoint at a specific
         # line of code. When the code is executed, it will pause at that line and allow you to
         # interactively debug the program.
+        print("Hello")
         if data.edge_index.numel() == 0:
             print("Found a batch with no edges. Skipping.")
             return
