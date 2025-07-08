@@ -34,10 +34,8 @@ resource.setrlimit(
 def main(cfg: DictConfig):
     dataset_config = cfg["dataset"]
     pl.seed_everything(cfg.train.seed)
-    print(dataset_config)
-    print(dataset_config["name"])
-    print(cfg)
     cfg.train.batch_size = 1
+    cfg.experiment.train.batch_size = 1
     cfg.model.extra_features = None
 
     print("creating datasets")
