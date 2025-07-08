@@ -1636,6 +1636,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         # get extra features
         print("HERE")
         print(self.extra_features)
+        print(self.cfg.model.extra_features)
         extra_data = self.extra_features(sparse_noisy_data)
         if type(extra_data) == tuple:
             extra_data = extra_data[0]
