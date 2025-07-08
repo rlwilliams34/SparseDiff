@@ -1638,7 +1638,8 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         """At every training step (after adding noise) and step in sampling, compute extra information and append to
         the network input."""
         if True: #isinstance(self.extra_features, DummyExtraFeatures):
-            return {"node_t": sparse_noisy_data["node_t"],
+            node = torch.hstack([sparse_noisy_data["node_t"], sparse_noisy_data["charge_t"]])
+            return {"node_t": node,
                 "edge_index_t": sparse_noisy_data["comp_edge_index_t"],
                 "edge_attr_t": sparse_noisy_data["comp_edge_attr_t"],
                 "y_t": torch.hstack((sparse_noisy_data["y_t"], sparse_noisy_data["t_float"])).float(),
