@@ -37,6 +37,7 @@ def main(cfg: DictConfig):
     cfg.train.batch_size = 1
     cfg.experiment.train.batch_size = 1
     cfg.model.extra_features = None
+    cfg.model.edge_fraction = 0.1
     print(cfg)
 
     print("creating datasets")

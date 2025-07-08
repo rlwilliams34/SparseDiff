@@ -384,11 +384,16 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
                 edge_batch=query_edge_batch,
                 ptr=ptr,
             ).long()
-            query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(
-                triu_query_edge_index=triu_query_edge_index,
-                clean_edge_index=sparse_noisy_data["edge_index_t"],
-                clean_edge_attr=sparse_noisy_data["edge_attr_t"],
-            )
+            # query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(
+#                 triu_query_edge_index=triu_query_edge_index,
+#                 clean_edge_index=sparse_noisy_data["edge_index_t"],
+#                 clean_edge_attr=sparse_noisy_data["edge_attr_t"],
+#             )
+            
+            query_edge_index, _ = utils.to_undirected(triu_query_edge_index)
+            query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(query_edge_index=query_edge_index,clean_edge_index=sparse_noisy_data["edge_index_t"],clean_edge_attr=sparse_noisy_data["edge_attr_t"])
+            
+            
 
             # pass sparse comp_graph to dense comp_graph for ease calculation
             sparse_noisy_data["comp_edge_index_t"] = comp_edge_index
@@ -1520,12 +1525,13 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
 
             # concatenate query edges and existing edges together to get the computational graph
             # clean_edge_attr has the priority
-            query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(
-                triu_query_edge_index=triu_query_edge_index,
-                clean_edge_index=sparse_noisy_data["edge_index_t"],
-                clean_edge_attr=sparse_noisy_data["edge_attr_t"],
-            )
-
+            # query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(
+#                 triu_query_edge_index=triu_query_edge_index,
+#                 clean_edge_index=sparse_noisy_data["edge_index_t"],
+#                 clean_edge_attr=sparse_noisy_data["edge_attr_t"],
+#             )
+            query_edge_index, _ = utils.to_undirected(triu_query_edge_index)
+            query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(query_edge_index=query_edge_index,clean_edge_index=sparse_noisy_data["edge_index_t"],clean_edge_attr=sparse_noisy_data["edge_attr_t"])
             # add computational graph
             sparse_noisy_data["comp_edge_index_t"] = comp_edge_index
             sparse_noisy_data["comp_edge_attr_t"] = comp_edge_attr
