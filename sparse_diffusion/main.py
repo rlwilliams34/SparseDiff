@@ -36,6 +36,7 @@ def main(cfg: DictConfig):
     pl.seed_everything(cfg.train.seed)
     print(dataset_config)
     print(dataset_config["name"])
+    print(cfg)
     cfg.train.batch_size = 1
     cfg.model.extra_features = None
 
