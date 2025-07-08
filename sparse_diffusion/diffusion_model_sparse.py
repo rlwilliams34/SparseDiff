@@ -220,7 +220,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             num_classes=self.out_dims.E,
         )
 #         query_mask2, true_comp_edge_attr, true_comp_edge_index = mask_query_graph_from_comp_graph(query_edge_index=query_edge_index,edge_index=data.edge_index,edge_attr=data.edge_attr,num_classes=self.out_dims.E)
-#        query_true_edge_attr = true_comp_edge_attr[query_mask2]
+       query_true_edge_attr = true_comp_edge_attr[query_mask2]
         print("comp_edge_index.shape", comp_edge_index.shape)
         print("true_comp_edge_index.shape", true_comp_edge_index.shape)
         print("query_mask.sum", query_mask.sum().item())
