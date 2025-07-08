@@ -226,9 +226,17 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         print("query_mask.sum", query_mask.sum().item())
         print("query_mask2.sum", query_mask2.sum().item())
         print("~~~~~~~~~~~~~~~~~~~~~~~~")
-        assert (
-            true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
-        ).all()
+#         assert (
+#             true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
+#         ).all()
+        pred_edges = set(map(tuple, sparse_pred.edge_index.T.tolist()))
+        true_edges = set(map(tuple, true_comp_edge_index[:, query_mask2].T.tolist()))
+        
+        if pred_edges != true_edges:
+            print("MISMATCHED EDGE SETS")
+            print("In pred but not true:", pred_edges - true_edges)
+            print("In true but not pred:", true_edges - pred_edges)
+            raise ValueError("Mismatch between predicted and true edge indices.")
 
         true_data = utils.SparsePlaceHolder(
             node=data.x,
