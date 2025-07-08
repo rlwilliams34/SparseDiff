@@ -193,8 +193,6 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             clean_edge_index=sparse_noisy_data["edge_index_t"],
             clean_edge_attr=sparse_noisy_data["edge_attr_t"],
         )
-#         query_edge_index, _ = utils.to_undirected(triu_query_edge_index)
-#         query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(query_edge_index=query_edge_index,clean_edge_index=sparse_noisy_data["edge_index_t"],clean_edge_attr=sparse_noisy_data["edge_attr_t"])
 
         # pass sparse comp_graph to dense comp_graph for ease calculation
         sparse_noisy_data["comp_edge_index_t"] = comp_edge_index
@@ -221,24 +219,20 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             edge_attr=data.edge_attr,
             num_classes=self.out_dims.E,
         )
-#         query_mask2, true_comp_edge_attr, true_comp_edge_index = mask_query_graph_from_comp_graph(query_edge_index=query_edge_index,edge_index=data.edge_index,edge_attr=data.edge_attr,num_classes=self.out_dims.E)
         query_true_edge_attr = true_comp_edge_attr[query_mask2]
-        print("comp_edge_index.shape", comp_edge_index.shape)
-        print("true_comp_edge_index.shape", true_comp_edge_index.shape)
-        print("query_mask.sum", query_mask.sum().item())
-        print("query_mask2.sum", query_mask2.sum().item())
-        print("~~~~~~~~~~~~~~~~~~~~~~~~")
-#         assert (
-#             true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
-#         ).all()
-        pred_edges = set(map(tuple, sparse_pred.edge_index.T.tolist()))
-        true_edges = set(map(tuple, true_comp_edge_index[:, query_mask2].T.tolist()))
         
-        if pred_edges != true_edges:
-            print("MISMATCHED EDGE SETS")
-            print("In pred but not true:", pred_edges - true_edges)
-            print("In true but not pred:", true_edges - pred_edges)
-            raise ValueError("Mismatch between predicted and true edge indices.")
+        query_mask2 = query_mask
+        assert (
+            true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
+        ).all()
+#         pred_edges = set(map(tuple, sparse_pred.edge_index.T.tolist()))
+#         true_edges = set(map(tuple, true_comp_edge_index[:, query_mask2].T.tolist()))
+#         
+#         if pred_edges != true_edges:
+#             print("MISMATCHED EDGE SETS")
+#             print("In pred but not true:", pred_edges - true_edges)
+#             print("In true but not pred:", true_edges - pred_edges)
+#             raise ValueError("Mismatch between predicted and true edge indices.")
 
         true_data = utils.SparsePlaceHolder(
             node=data.x,
