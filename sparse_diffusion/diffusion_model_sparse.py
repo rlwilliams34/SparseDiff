@@ -1150,7 +1150,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         y = sparse_noisy_data["y_t"]
         batch = sparse_noisy_data["batch"].long()
 
-        return self.model(node, edge_attr, edge_index, y, batch)
+        return self.model(node.float(), edge_attr, edge_index, y, batch)
 
     def forward(self, noisy_data):
         """
