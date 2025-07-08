@@ -1634,6 +1634,8 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         """At every training step (after adding noise) and step in sampling, compute extra information and append to
         the network input."""
         # get extra features
+        print("HERE")
+        print(self.extra_features)
         extra_data = self.extra_features(sparse_noisy_data)
         if type(extra_data) == tuple:
             extra_data = extra_data[0]
