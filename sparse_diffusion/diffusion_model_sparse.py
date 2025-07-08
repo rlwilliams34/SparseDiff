@@ -223,6 +223,10 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         print("query mask 2: ", query_mask2.shape)
         print("sparse pred edge: ", sparse_pred.edge_index.shape)
         print("========================")
+        print(true_comp_edge_index)
+        print(query_mask2)
+        print(sparse_pred.edge_index)
+        print("~~~~~~~~~~~~~~~~~~~~~~~~")
         assert (
             true_comp_edge_index[:, query_mask2] - sparse_pred.edge_index == 0
         ).all()
@@ -1673,10 +1677,10 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         comp_edge_index0 = dense_comp_edge_index[0] % n_node
         comp_edge_index1 = dense_comp_edge_index[1] % n_node
         
-        print(extra_data.E)
-        print(comp_edge_index0)
-        print(comp_edge_index1)
-        print(edge_batch)
+#         print(extra_data.E)
+#         print(comp_edge_index0)
+#         print(comp_edge_index1)
+#         print(edge_batch)
         
         extraE = extra_data.E[
             edge_batch, comp_edge_index0.long(), comp_edge_index1.long()
