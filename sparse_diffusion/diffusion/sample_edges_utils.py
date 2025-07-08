@@ -64,60 +64,110 @@ def condensed_to_matrix_index_batch(condensed_index, num_nodes, edge_batch, ptr)
     return torch.vstack((ii.long(), jj.long())) + ptr[edge_batch]
 
 
-def get_computational_graph(
-    triu_query_edge_index,
-    clean_edge_index,
-    clean_edge_attr,
-    triu=True,
-):
-    """
-    concat and remove repeated edges of query_edge_index and clean_edge_index
-    mask the position of query_edge_index
-    in case where query_edge_attr is None, return query_edge_attr as 0
-    else, return query_edge_attr for all query_edge_index
-    (used in apply noise, when we need to sample the query edge attr)
-    """
-    # get dimension information
-    de = clean_edge_attr.shape[-1]
-    device = triu_query_edge_index.device
+# def get_computational_graph(
+#     triu_query_edge_index,
+#     clean_edge_index,
+#     clean_edge_attr,
+#     triu=True,
+# ):
+#     """
+#     concat and remove repeated edges of query_edge_index and clean_edge_index
+#     mask the position of query_edge_index
+#     in case where query_edge_attr is None, return query_edge_attr as 0
+#     else, return query_edge_attr for all query_edge_index
+#     (used in apply noise, when we need to sample the query edge attr)
+#     """
+#     # get dimension information
+#     de = clean_edge_attr.shape[-1]
+#     device = triu_query_edge_index.device
+# 
+#     # create default query edge attr
+#     default_query_edge_attr = torch.zeros((triu_query_edge_index.shape[1], de)).to(
+#         device
+#     )
+#     default_query_edge_attr[:, 0] = 1
+# 
+#     # if query_edge_attr is None, use default query edge attr
+#     if triu:
+#         # make random edges symmetrical
+#         query_edge_index, default_query_edge_attr = utils.to_undirected(
+#             triu_query_edge_index, default_query_edge_attr
+#         )
+#         _, default_query_edge_attr = utils.to_undirected(
+#             triu_query_edge_index, default_query_edge_attr
+#         )
+#     else:
+#         query_edge_index, default_query_edge_attr = triu_query_edge_index, default_query_edge_attr
+# 
+#     # get the computational graph: positive edges + random edges
+#     comp_edge_index = torch.hstack([clean_edge_index, query_edge_index])
+#     default_comp_edge_attr = torch.argmax(
+#         torch.vstack([clean_edge_attr, default_query_edge_attr]), -1
+#     )
+# 
+#     # reduce repeated edges and get the mask
+#     assert comp_edge_index.dtype == torch.long
+#     _, min_default_edge_attr = coalesce(
+#         comp_edge_index, default_comp_edge_attr, reduce="min"
+#     )
+# 
+#     max_comp_edge_index, max_default_edge_attr = coalesce(
+#         comp_edge_index, default_comp_edge_attr, reduce="max"
+#     )
+#     query_mask = min_default_edge_attr == 0
+#     comp_edge_attr = F.one_hot(max_default_edge_attr.long(), num_classes=de).float()
+# 
+#     return query_mask, max_comp_edge_index, comp_edge_attr
 
-    # create default query edge attr
-    default_query_edge_attr = torch.zeros((triu_query_edge_index.shape[1], de)).to(
-        device
-    )
+
+def get_computational_graph(query_edge_index,clean_edge_index,clean_edge_attr):
+    """
+    Build computational graph from clean + query edges.
+    Returns a query mask, final edge index, and one-hot edge attributes.
+    """
+    de = clean_edge_attr.shape[-1]
+    device = query_edge_index.device
+
+    # default query edge attr: class 0
+    default_query_edge_attr = torch.zeros((query_edge_index.shape[1], de), device=device)
     default_query_edge_attr[:, 0] = 1
 
-    # if query_edge_attr is None, use default query edge attr
-    if triu:
-        # make random edges symmetrical
-        query_edge_index, default_query_edge_attr = utils.to_undirected(
-            triu_query_edge_index, default_query_edge_attr
-        )
-        _, default_query_edge_attr = utils.to_undirected(
-            triu_query_edge_index, default_query_edge_attr
-        )
-    else:
-        query_edge_index, default_query_edge_attr = triu_query_edge_index, default_query_edge_attr
-
-    # get the computational graph: positive edges + random edges
+    # combine clean + query
     comp_edge_index = torch.hstack([clean_edge_index, query_edge_index])
     default_comp_edge_attr = torch.argmax(
-        torch.vstack([clean_edge_attr, default_query_edge_attr]), -1
+        torch.vstack([clean_edge_attr, default_query_edge_attr]), dim=-1
     )
 
-    # reduce repeated edges and get the mask
-    assert comp_edge_index.dtype == torch.long
-    _, min_default_edge_attr = coalesce(
-        comp_edge_index, default_comp_edge_attr, reduce="min"
-    )
+    # coalesce and track which are query edges
+    _, min_edge_attr = coalesce(comp_edge_index, default_comp_edge_attr, reduce="min")
+    final_edge_index, max_edge_attr = coalesce(comp_edge_index, default_comp_edge_attr, reduce="max")
 
-    max_comp_edge_index, max_default_edge_attr = coalesce(
-        comp_edge_index, default_comp_edge_attr, reduce="max"
-    )
-    query_mask = min_default_edge_attr == 0
-    comp_edge_attr = F.one_hot(max_default_edge_attr.long(), num_classes=de).float()
+    query_mask = (min_edge_attr == 0)  # query edges were tagged with class 0
+    comp_edge_attr = F.one_hot(max_edge_attr, num_classes=de).float()
 
-    return query_mask, max_comp_edge_index, comp_edge_attr
+    return query_mask, final_edge_index, comp_edge_attr
+
+
+def mask_query_graph_from_comp_graph(query_edge_index,edge_index,edge_attr,num_classes):
+    """
+    Merge query edges with clean edges, and extract mask + final edge features.
+    Used to match predicted query edge locations with ground truth.
+    """
+    all_edge_index = torch.hstack([edge_index, query_edge_index])
+    all_edge_attr = torch.hstack([
+        torch.argmax(edge_attr, -1),
+        torch.zeros(query_edge_index.shape[1], device=edge_index.device)])
+    
+    _, min_edge_attr = coalesce(all_edge_index, all_edge_attr, reduce="min")
+    final_edge_index, max_edge_attr = coalesce(all_edge_index, all_edge_attr, reduce="max")
+    
+    query_mask = (min_edge_attr == 0)
+    final_edge_attr = F.one_hot(max_edge_attr, num_classes=num_classes)
+    
+    return query_mask, final_edge_attr, final_edge_index
+
+
+
 
 
 def check_symmetry(edge_index):
@@ -129,32 +179,32 @@ def check_symmetry(edge_index):
     return cond1 and cond2
 
 
-def mask_query_graph_from_comp_graph(
-    triu_query_edge_index, edge_index, edge_attr, num_classes
-):
-    query_edge_index = utils.to_undirected(triu_query_edge_index)
-    # import pdb; pdb.set_trace()
-
-    all_edge_index = torch.hstack([edge_index, query_edge_index])
-    all_edge_attr = torch.hstack(
-        [
-            torch.argmax(edge_attr, -1),
-            torch.zeros(query_edge_index.shape[1]).to(edge_index.device),
-        ]
-    )
-
-    assert all_edge_index.dtype == torch.long
-    _, min_edge_attr = coalesce(all_edge_index, all_edge_attr, reduce="min")
-
-    max_edge_index, max_edge_attr = coalesce(
-        all_edge_index, all_edge_attr, reduce="max"
-    )
-
-    return (
-        min_edge_attr == 0,
-        F.one_hot(max_edge_attr.long(), num_classes=num_classes),
-        max_edge_index,
-    )
+# def mask_query_graph_from_comp_graph(
+#     triu_query_edge_index, edge_index, edge_attr, num_classes
+# ):
+#     query_edge_index = utils.to_undirected(triu_query_edge_index)
+#     # import pdb; pdb.set_trace()
+# 
+#     all_edge_index = torch.hstack([edge_index, query_edge_index])
+#     all_edge_attr = torch.hstack(
+#         [
+#             torch.argmax(edge_attr, -1),
+#             torch.zeros(query_edge_index.shape[1]).to(edge_index.device),
+#         ]
+#     )
+# 
+#     assert all_edge_index.dtype == torch.long
+#     _, min_edge_attr = coalesce(all_edge_index, all_edge_attr, reduce="min")
+# 
+#     max_edge_index, max_edge_attr = coalesce(
+#         all_edge_index, all_edge_attr, reduce="max"
+#     )
+# 
+#     return (
+#         min_edge_attr == 0,
+#         F.one_hot(max_edge_attr.long(), num_classes=num_classes),
+#         max_edge_index,
+#     )
 
 
 def sample_non_existing_edge_attr(query_edges_dist_batch, num_edges_to_sample):

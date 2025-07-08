@@ -188,11 +188,13 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
             num_nodes_per_graph=data.ptr.diff(), edge_proportion=self.edge_fraction
         )
 
-        query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(
-            triu_query_edge_index=triu_query_edge_index,
-            clean_edge_index=sparse_noisy_data["edge_index_t"],
-            clean_edge_attr=sparse_noisy_data["edge_attr_t"],
-        )
+#         query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(
+#             triu_query_edge_index=triu_query_edge_index,
+#             clean_edge_index=sparse_noisy_data["edge_index_t"],
+#             clean_edge_attr=sparse_noisy_data["edge_attr_t"],
+#         )
+        query_edge_index, _ = utils.to_undirected(triu_query_edge_index)
+        query_mask, comp_edge_index, comp_edge_attr = get_computational_graph(query_edge_index=query_edge_index,clean_edge_index=sparse_noisy_data["edge_index_t"],clean_edge_attr=sparse_noisy_data["edge_attr_t"])
 
         # pass sparse comp_graph to dense comp_graph for ease calculation
         sparse_noisy_data["comp_edge_index_t"] = comp_edge_index
@@ -207,17 +209,17 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         # We have the true edge index at time 0, and the query edge index at time t. This function
         # merge the query edges and edge index at time 0, delete repeated one, and retune the mask
         # for the true attr of query edges
-        (
-            query_mask2,
-            true_comp_edge_attr,
-            true_comp_edge_index,
-        ) = mask_query_graph_from_comp_graph(
-            triu_query_edge_index=triu_query_edge_index,
-            edge_index=data.edge_index,
-            edge_attr=data.edge_attr,
-            num_classes=self.out_dims.E,
-        )
-
+#         (
+#             query_mask2,
+#             true_comp_edge_attr,
+#             true_comp_edge_index,
+#         ) = mask_query_graph_from_comp_graph(
+#             triu_query_edge_index=triu_query_edge_index,
+#             edge_index=data.edge_index,
+#             edge_attr=data.edge_attr,
+#             num_classes=self.out_dims.E,
+#         )
+        query_mask2, true_comp_edge_attr, true_comp_edge_index = mask_query_graph_from_comp_graph(query_edge_index=query_edge_index,edge_index=data.edge_index,edge_attr=data.edge_attr,num_classes=self.out_dims.E)
         query_true_edge_attr = true_comp_edge_attr[query_mask2]
         print("true comp edge idx: ", true_comp_edge_index.shape)
         print("query mask 2: ", query_mask2.shape)
