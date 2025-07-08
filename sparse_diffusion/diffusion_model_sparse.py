@@ -203,7 +203,9 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
 
         # Compute the loss on the query edges only
         sparse_pred.edge_attr = sparse_pred.edge_attr[query_mask]
+        print(sparse_pred.edge_index)
         sparse_pred.edge_index = comp_edge_index[:, query_mask]
+        print(sparse_pred.edge_index)
 
         # mask true label for query edges
         # We have the true edge index at time 0, and the query edge index at time t. This function
