@@ -1633,6 +1633,13 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
     def compute_extra_data(self, sparse_noisy_data):
         """At every training step (after adding noise) and step in sampling, compute extra information and append to
         the network input."""
+        if isinstance(self.extra_features, DummyExtraFeatures):
+            return {"node_t": sparse_noisy_data["node_t"],
+                "edge_index_t": sparse_noisy_data["comp_edge_index_t"],
+                "edge_attr_t": sparse_noisy_data["comp_edge_attr_t"],
+                "y_t": torch.hstack((sparse_noisy_data["y_t"], sparse_noisy_data["t_float"])).float(),
+                "batch": sparse_noisy_data["batch"],
+                "charge_t": sparse_noisy_data["charge_t"]}
         # get extra features
         extra_data = self.extra_features(sparse_noisy_data)
         if type(extra_data) == tuple:
