@@ -34,7 +34,7 @@ resource.setrlimit(
 def main(cfg: DictConfig):
     dataset_config = cfg["dataset"]
     pl.seed_everything(cfg.train.seed)
-    cfg.train.batch_size = 50
+    cfg.train.batch_size = 100
     cfg.experiment.train.batch_size = 1
     cfg.model.extra_features = None
     cfg.model.edge_fraction = 0.1
