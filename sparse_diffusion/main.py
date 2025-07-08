@@ -37,6 +37,7 @@ def main(cfg: DictConfig):
     cfg.train.batch_size = 1
     cfg.experiment.train.batch_size = 1
     cfg.model.extra_features = None
+    print(cfg)
 
     print("creating datasets")
     if dataset_config["name"] in ["sbm", "comm20", "planar", "ego"]:
