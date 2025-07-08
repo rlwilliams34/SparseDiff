@@ -354,6 +354,10 @@ class SparsePlaceHolder:
         self.node = torch.argmax(self.node, dim=-1)
         # copy.charge = collapse_charge.to(self.charge.device)[torch.argmax(self.charge, dim=-1)]
         self.edge_attr = torch.argmax(self.edge_attr, dim=-1)
+    
+    @property
+    def E(self):
+        return self.edge_attr
 
 
 def delete_repeated_twice_edges(edge_index, edge_attr):    
