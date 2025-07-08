@@ -357,8 +357,19 @@ class SparsePlaceHolder:
     
     @property
     def E(self):
-        return self.edge_attr
-
+        B = self.ptr.shape[0] - 1
+        N = self.ptr.diff().max()
+        E_dense = self.edge_attr.new_zeros((B, N, N, d_e))
+    
+        for b in range(B):
+            start, end = self.ptr[b].item(), self.ptr[b + 1].item()
+            mask = (self.edge_index[0] >= start) & (self.edge_index[0] < end)
+            src = self.edge_index[0, mask] - start
+            dst = self.edge_index[1, mask] - start
+            E_dense[b, src, dst] = self.edge_attr[mask]
+    
+        return E_dense
+        
 
 def delete_repeated_twice_edges(edge_index, edge_attr):    
     min_edge_index, min_edge_attr = coalesce(

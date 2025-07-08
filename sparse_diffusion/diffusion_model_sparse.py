@@ -293,11 +293,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         It neccecitates an iteration as in the sampling step
         """
         
-        print(data)
-        print("=================================")
         data = self.dataset_info.to_one_hot(data)
-        print(data)
-        print(STOP)
         sparse_noisy_data = self.apply_sparse_noise(data)
         ptr = data.ptr
         batch = data.batch
@@ -1638,9 +1634,6 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         """At every training step (after adding noise) and step in sampling, compute extra information and append to
         the network input."""
         # get extra features
-        print("HERE")
-        print(self.extra_features)
-        print(self.cfg.model.extra_features)
         extra_data = self.extra_features(sparse_noisy_data)
         if type(extra_data) == tuple:
             extra_data = extra_data[0]
