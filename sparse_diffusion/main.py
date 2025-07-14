@@ -24,6 +24,8 @@ from sparse_diffusion.metrics.sampling_metrics import SamplingMetrics
 
 # debug for multi-gpu
 import resource
+import time
+
 
 resource.setrlimit(
     resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.RLIM_INFINITY)
@@ -34,7 +36,7 @@ resource.setrlimit(
 def main(cfg: DictConfig):
     dataset_config = cfg["dataset"]
     pl.seed_everything(cfg.train.seed)
-    cfg.train.batch_size = 50
+    cfg.train.batch_size = 1
     cfg.experiment.train.batch_size = 1
     cfg.model.extra_features = None
     cfg.model.edge_fraction = 0.5
@@ -170,7 +172,35 @@ def main(cfg: DictConfig):
     utils.create_folders(cfg)
 
     print("creating model")
-    model = DiscreteDenoisingDiffusion(cfg=cfg, **model_kwargs)
+    model = DiscreteDenoisingDiffusion(cfg=cfg, **model_kwargs).to("cuda")
+    
+    
+    ### TIMING CODE
+    # --- Get single graph ---
+    datamodule.setup("test")
+    batch = next(iter(datamodule.test_dataloader()))
+    batch = batch.to(model.device)
+    
+    # --- Get optimizer ---
+    optimizer = model.configure_optimizers()  # returns a fresh one, fine for 1 step
+    
+    # --- Do forward+backward+step manually ---
+    torch.cuda.empty_cache()
+    torch.cuda.synchronize()
+    optimizer.zero_grad()
+    
+    start = time.time()
+    out = model.training_step(batch, batch_idx=0)  # This returns a dict
+    torch.cuda.synchronize()
+    loss = out["loss"]
+    loss.backward()
+    optimizer.step()
+    torch.cuda.synchronize()
+    end = time.time()
+    
+    print(f"\n⏱ Total time (forward + backward + step) on 1 graph: {end - start:.6f} seconds\n")
+    import sys
+    sys.exit()
 
     callbacks = []
     if cfg.train.save_model:

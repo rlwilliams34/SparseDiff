@@ -5,6 +5,7 @@ import os.path as osp
 import numpy as np
 from tqdm import tqdm
 import networkx as nx
+import random
 import torch
 import pickle as pkl
 import torch_geometric.utils
@@ -42,11 +43,66 @@ from sparse_diffusion.diffusion.distributions import DistributionNodes
 #from sparse_diffusion.metrics.abstract_metrics import TrainAbstractMetricsDiscrete
 
 
+def tree_top_generator(l, py_random):
+    """
+    Generates a random bifurcating tree with l leaves.
+    More efficient than scanning the whole node list each time.
+    """
+    g = nx.Graph()
+
+    # Start with a root node connected to two leaves
+    g.add_edges_from([(0, 1), (0, 2)])
+    next_node = 3
+    active_leaves = [1, 2]
+
+    for _ in range(l - 2):
+        # Pick a random active leaf
+        selected = py_random.choice(active_leaves)
+        active_leaves.remove(selected)
+
+        # Add two new leaves
+        left = next_node
+        right = next_node + 1
+        next_node += 2
+
+        g.add_edges_from([(selected, left), (selected, right)])
+        active_leaves.extend([left, right])
+
+    return g
+
+
+def tree_generator(num_leaves, seed = 285):
+    '''
+    Generates requested number of bifurcating trees
+    Args:
+        n: number of leaves
+        num_graphs: number of requested graphs
+    '''
+    npr = np.random.RandomState(seed)
+    py_random = random.Random(seed)
+    g = tree_top_generator(num_leaves, py_random)
+    mu = npr.uniform(7, 13)
+    weights = npr.gamma(mu * mu, 1 / mu, g.number_of_edges())
+
+    # Add weights directly to edges
+    for ((n1, n2), w) in zip(g.edges(), weights):
+        g[n1][n2]['weight'] = w
+    return g
+
+
+
+
+
+
+
+
 
 class LobsterDataset(InMemoryDataset):
-    def __init__(self, root, split='train', n_bins=10, transform=None, pre_transform=None):
+    def __init__(self, root, split='train', n_bins=100, num_leaves=100, seed=100, transform=None, pre_transform=None):
         self.split = split
         self.n_bins = n_bins
+        self.num_leaves = num_leaves
+        self.seed = seed
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
         self.midpoints = None
@@ -60,26 +116,23 @@ class LobsterDataset(InMemoryDataset):
         return [f'{self.split}_data.pt']
 
     def process(self):
-        raw_path = os.path.join(self.root, f'{self.split}-graphs.pkl')
-        with open(raw_path, 'rb') as f:
-            nx_graphs = pickle.load(f)
+        G = tree_generator(num_leaves=self.num_leaves, seed=self.seed)
 
         # Optionally compute global min/max across all weights
-        all_weights = [g[u][v]['weight'] for g in nx_graphs for u, v in g.edges()]
-        gmin, gmax = min(all_weights), max(all_weights)
+        weights = [G[u][v]['weight'] for u, v in G.edges()]
+        gmin, gmax = min(weights), max(weights)
         bins = np.linspace(gmin, gmax, self.n_bins + 1)
         midpoints = 0.5 * (bins[:-1] + bins[1:])
         self.midpoints = midpoints
         np.save(os.path.join(self.processed_dir, f'{self.split}_midpoints.npy'), self.midpoints)
 
-        pyg_graphs = [graph_to_pyg_data(g, bins = bins, n_bins=self.n_bins, global_min=gmin, global_max=gmax) for g in nx_graphs]
+        pyg_graph = graph_to_pyg_data(G, bins = bins, n_bins=self.n_bins, global_min=gmin, global_max=gmax)
 
-        data, slices = self.collate(pyg_graphs)
+        data, slices = self.collate([pyg_graph])
         torch.save((data, slices), self.processed_paths[0])
     
     def get_midpoints(self):
         return self.midpoints
-
 
 
 class LobsterDataModule(AbstractDataModule):
@@ -88,10 +141,12 @@ class LobsterDataModule(AbstractDataModule):
         self.cfg = cfg
         self.batch_size = cfg.train.batch_size
         self.n_bins = cfg.dataset.n_bins
+        self.num_leaves = 50
+        self.seed = 285
         datasets = {
-            "train": LobsterDataset(cfg.dataset.root, split="train", n_bins=self.n_bins),
-            "val": LobsterDataset(cfg.dataset.root, split="val", n_bins=self.n_bins),
-            "test": LobsterDataset(cfg.dataset.root, split="test", n_bins=self.n_bins),
+            "train": LobsterDataset(cfg.dataset.root, split="train", n_bins=self.n_bins, num_leaves = self.num_leaves, seed = self.seed),
+            "val": LobsterDataset(cfg.dataset.root, split="val", n_bins=self.n_bins, num_leaves = self.num_leaves, seed = self.seed),
+            "test": LobsterDataset(cfg.dataset.root, split="test", n_bins=self.n_bins, num_leaves = self.num_leaves, seed = self.seed),
         }
         super().__init__(cfg, datasets)
         self.dataset_stat()
