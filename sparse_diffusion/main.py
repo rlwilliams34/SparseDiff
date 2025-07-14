@@ -190,7 +190,7 @@ def main(cfg: DictConfig):
     optimizer.zero_grad()
     
     start = time.time()
-    out = model.training_step(batch, batch_idx=0)  # This returns a dict
+    out = model.training_step(batch, 0) 
     torch.cuda.synchronize()
     loss = out["loss"]
     loss.backward()
