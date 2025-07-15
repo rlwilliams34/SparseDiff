@@ -118,6 +118,7 @@ class LobsterDataset(InMemoryDataset):
 
     def process(self):
         G = tree_generator(num_leaves=self.num_leaves, seed=self.seed)
+        print(G.edges())
 
         # Optionally compute global min/max across all weights
         weights = [G[u][v]['weight'] for u, v in G.edges()]
