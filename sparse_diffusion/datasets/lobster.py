@@ -98,7 +98,7 @@ def tree_generator(num_leaves, seed = 285):
 
 
 class LobsterDataset(InMemoryDataset):
-    def __init__(self, root, split='train', n_bins=100, num_leaves=5, seed=100, transform=None, pre_transform=None):
+    def __init__(self, root, split='train', n_bins=100, num_leaves=50, seed=100, transform=None, pre_transform=None):
         self.split = split
         self.n_bins = n_bins
         self.num_leaves = num_leaves
@@ -143,7 +143,7 @@ class LobsterDataModule(AbstractDataModule):
         self.cfg = cfg
         self.batch_size = cfg.train.batch_size
         self.n_bins = cfg.dataset.n_bins
-        self.num_leaves = 5
+        self.num_leaves = 50
         self.seed = 285
         datasets = {
             "train": LobsterDataset(cfg.dataset.root, split="train", n_bins=self.n_bins, num_leaves = self.num_leaves, seed = self.seed),
