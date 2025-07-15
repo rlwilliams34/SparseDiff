@@ -35,42 +35,101 @@ from torch_geometric.data import InMemoryDataset, Data
 from sparse_diffusion.datasets.utils import graph_to_pyg_data  # If you move your conversion here
 from glob import glob
 
+def tree_top_generator(l, py_random):
+    """
+    Generates a random bifurcating tree with l leaves.
+    More efficient than scanning the whole node list each time.
+    """
+    g = nx.Graph()
+
+    # Start with a root node connected to two leaves
+    g.add_edges_from([(0, 1), (0, 2)])
+    next_node = 3
+    active_leaves = [1, 2]
+
+    for _ in range(l - 2):
+        # Pick a random active leaf
+        selected = py_random.choice(active_leaves)
+        active_leaves.remove(selected)
+
+        # Add two new leaves
+        left = next_node
+        right = next_node + 1
+        next_node += 2
+
+        g.add_edges_from([(selected, left), (selected, right)])
+        active_leaves.extend([left, right])
+
+    return g
+
+
+def tree_generator(num_leaves, seed = 285):
+    '''
+    Generates requested number of bifurcating trees
+    Args:
+        n: number of leaves
+        num_graphs: number of requested graphs
+    '''
+    npr = np.random.RandomState(seed)
+    py_random = random.Random(seed)
+    g = tree_top_generator(num_leaves, py_random)
+    mu = npr.uniform(7, 13)
+    weights = npr.gamma(mu * mu, 1 / mu, g.number_of_edges())
+
+    # Add weights directly to edges
+    for ((n1, n2), w) in zip(g.edges(), weights):
+        g[n1][n2]['weight'] = w
+    return g
 
 
 class LobsterDataset(InMemoryDataset):
-    def __init__(self, root, split='train', n_bins=10, transform=None, pre_transform=None):
+    def __init__(self, root, split='train', n_bins=100, num_leaves=100, seed=100, transform=None, pre_transform=None):
         self.split = split
         self.n_bins = n_bins
-        super().__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.num_leaves = num_leaves
+        self.seed = seed
         self.midpoints = None
+        super().__init__(root, transform, pre_transform)
+
+        # Load saved data if it exists
+        self.data, self.slices = torch.load(self.processed_paths[0])
+
+        # Load midpoints if they were saved
         midpoint_path = os.path.join(self.processed_dir, f'{self.split}_midpoints.npy')
         if os.path.exists(midpoint_path):
             self.midpoints = np.load(midpoint_path)
-        
+        else:
+            print(f"[Warning] Midpoints not found for {self.split} — did you call process()?")
 
     @property
     def processed_file_names(self):
         return [f'{self.split}_data.pt']
 
     def process(self):
-        raw_path = os.path.join(self.root, f'{self.split}-graphs.pkl')
-        with open(raw_path, 'rb') as f:
-            nx_graphs = pickle.load(f)
+        # Generate a synthetic tree with edge weights
+        G = tree_generator(num_leaves=self.num_leaves, seed=self.seed)
+        print(f"[{self.split}] Generated tree with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges")
 
-        # Optionally compute global min/max across all weights
-        all_weights = [g[u][v]['weight'] for g in nx_graphs for u, v in g.edges()]
-        gmin, gmax = min(all_weights), max(all_weights)
+        # Get all edge weights and compute bins
+        weights = [G[u][v]['weight'] for u, v in G.edges()]
+        gmin, gmax = min(weights), max(weights)
         bins = np.linspace(gmin, gmax, self.n_bins + 1)
-        midpoints = 0.5 * (bins[:-1] + bins[1:])
-        self.midpoints = midpoints
+        self.midpoints = 0.5 * (bins[:-1] + bins[1:])
         np.save(os.path.join(self.processed_dir, f'{self.split}_midpoints.npy'), self.midpoints)
 
-        pyg_graphs = [graph_to_pyg_data(g, bins = bins, n_bins=self.n_bins, global_min=gmin, global_max=gmax) for g in nx_graphs]
+        # Convert NetworkX graph to PyG Data object
+        pyg_graph = graph_to_pyg_data(
+            G,
+            bins=bins,
+            n_bins=self.n_bins,
+            global_min=gmin,
+            global_max=gmax,
+        )
 
-        data, slices = self.collate(pyg_graphs)
+        # Collate and save
+        data, slices = self.collate([pyg_graph])
         torch.save((data, slices), self.processed_paths[0])
-    
+
     def get_midpoints(self):
         return self.midpoints
 
