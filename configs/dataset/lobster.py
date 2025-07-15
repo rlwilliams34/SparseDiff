@@ -83,7 +83,7 @@ def tree_generator(num_leaves, seed = 285):
 
 
 class LobsterDataset(InMemoryDataset):
-    def __init__(self, root, split='train', n_bins=100, num_leaves=500, seed=100, transform=None, pre_transform=None):
+    def __init__(self, root, split='train', n_bins=100, num_leaves=7500, seed=100, transform=None, pre_transform=None):
         self.split = split
         self.n_bins = n_bins
         self.num_leaves = num_leaves
