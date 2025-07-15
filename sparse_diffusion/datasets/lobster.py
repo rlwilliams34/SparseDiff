@@ -102,6 +102,7 @@ class LobsterDataset(InMemoryDataset):
         self.split = split
         self.n_bins = n_bins
         self.num_leaves = num_leaves
+        print("Num leaves: ", self.num_leaves)
         self.seed = seed
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
