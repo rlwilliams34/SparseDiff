@@ -70,7 +70,6 @@ def tree_generator(num_leaves, seed = 285):
         n: number of leaves
         num_graphs: number of requested graphs
     '''
-    num_leaves = 50
     npr = np.random.RandomState(seed)
     py_random = random.Random(seed)
     g = tree_top_generator(num_leaves, py_random)
@@ -84,7 +83,7 @@ def tree_generator(num_leaves, seed = 285):
 
 
 class LobsterDataset(InMemoryDataset):
-    def __init__(self, root, split='train', n_bins=100, num_leaves=250, seed=285, transform=None, pre_transform=None):
+    def __init__(self, root, split='train', n_bins=100, num_leaves=50, seed=285, transform=None, pre_transform=None):
         self.split = split
         self.n_bins = n_bins
         self.num_leaves = num_leaves
