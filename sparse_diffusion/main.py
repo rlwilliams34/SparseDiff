@@ -184,7 +184,7 @@ def main(cfg: DictConfig):
     import numpy as np
     memories = []
     # --- Get optimizer ---
-    for i in range(10):
+    for i in range(1):
         optimizer = model.configure_optimizers()  # returns a fresh one, fine for 1 step
         
         # --- Do forward+backward+step manually ---
@@ -203,9 +203,8 @@ def main(cfg: DictConfig):
         end = time.time() - start
         mem_used = torch.cuda.max_memory_allocated() / 1024**2 
         
-        if i >= 3:
-            times.append(end)
-            memories.append(mem_used)
+        times.append(end)
+        memories.append(mem_used)
     
     print("Times: ", times)
     print("Average Time in 7 runs: ", np.mean(times))
