@@ -199,11 +199,11 @@ def main(cfg: DictConfig):
         loss.backward()
         optimizer.step()
         torch.cuda.synchronize()
-        end = time.time()
+        end = time.time() - start
         mem_used = torch.cuda.max_memory_allocated() / 1024**2 
         
         if i >= 3:
-            times.append(cur_gcn.total_seconds())
+            times.append(end)
             memories.append(mem_used)
     
     print("Times: ", times)
