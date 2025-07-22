@@ -143,7 +143,7 @@ class LobsterDataModule(AbstractDataModule):
         self.cfg = cfg
         self.batch_size = cfg.train.batch_size
         self.n_bins = cfg.dataset.n_bins
-        self.num_leaves = 1000
+        self.num_leaves = 750
         self.seed = 285
         datasets = {
             "train": LobsterDataset(cfg.dataset.root, split="train", n_bins=self.n_bins, num_leaves = self.num_leaves, seed = self.seed),
