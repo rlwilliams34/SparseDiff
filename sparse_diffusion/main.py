@@ -181,6 +181,7 @@ def main(cfg: DictConfig):
     batch = next(iter(datamodule.test_dataloader()))
     batch = batch.to(model.device)
     times = []
+    import numpy as np
     memories = []
     # --- Get optimizer ---
     for i in range(10):
