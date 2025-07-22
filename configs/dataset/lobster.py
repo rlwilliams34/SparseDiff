@@ -70,7 +70,7 @@ def tree_generator(num_leaves, seed = 285):
         n: number of leaves
         num_graphs: number of requested graphs
     '''
-    num_leaves = 750
+    num_leaves = 500
     npr = np.random.RandomState(seed)
     py_random = random.Random(seed)
     g = tree_top_generator(num_leaves, py_random)
