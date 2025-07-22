@@ -180,25 +180,35 @@ def main(cfg: DictConfig):
     datamodule.setup("test")
     batch = next(iter(datamodule.test_dataloader()))
     batch = batch.to(model.device)
-    
+    times = []
+    memories = []
     # --- Get optimizer ---
-    optimizer = model.configure_optimizers()  # returns a fresh one, fine for 1 step
+    for i in range(10):
+        optimizer = model.configure_optimizers()  # returns a fresh one, fine for 1 step
+        
+        # --- Do forward+backward+step manually ---
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats()
+        torch.cuda.synchronize()
+        optimizer.zero_grad()
+        
+        start = time.time()
+        out = model.training_step(batch, 0) 
+        torch.cuda.synchronize()
+        loss = out["loss"]
+        loss.backward()
+        optimizer.step()
+        torch.cuda.synchronize()
+        end = time.time()
+        mem_used = torch.cuda.max_memory_allocated() / 1024**2 
+        
+        if i >= 3:
+            times.append(cur_gcn.total_seconds())
+            memories.append(mem_used)
     
-    # --- Do forward+backward+step manually ---
-    torch.cuda.empty_cache()
-    torch.cuda.synchronize()
-    optimizer.zero_grad()
-    
-    start = time.time()
-    out = model.training_step(batch, 0) 
-    torch.cuda.synchronize()
-    loss = out["loss"]
-    loss.backward()
-    optimizer.step()
-    torch.cuda.synchronize()
-    end = time.time()
-    
-    print(f"\n⏱ Total time (forward + backward + step) on 1 graph: {end - start:.6f} seconds\n")
+    print("Times: ", times)
+    print("Average Time in 7 runs: ", np.mean(times))
+    print("Average Peak Memory in 7 runs: ", np.mean(memories))
     import sys
     sys.exit()
 
